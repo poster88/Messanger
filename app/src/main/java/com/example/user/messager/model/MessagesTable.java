@@ -8,15 +8,22 @@ import java.util.ArrayList;
  */
 
 public class MessagesTable {
-    private ChatUserInfo chatUserInfo;
-    private Chats chats;
+    private ArrayList<ChatModel> chatModels;
+    private ArrayList<Chats> chatsArrayList;
 
-
-    private class ChatUserInfo {
-        private ArrayList<ChatModel> chatModels;
+    public ArrayList<ChatModel> getChatModels() {
+        return chatModels;
     }
 
-    private class Chats {
-        private ArrayList<Message> messages;
+    public void setChatModels(ArrayList<ChatModel> chatModels) {
+        this.chatModels = chatModels;
+    }
+
+    public ArrayList<Chats> getChatsArrayList() {
+        return chatsArrayList;
+    }
+
+    public void setChatsArrayList(ArrayList<Chats> chatsArrayList) {
+        this.chatsArrayList = chatsArrayList;
     }
 }

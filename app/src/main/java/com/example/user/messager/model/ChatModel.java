@@ -9,8 +9,7 @@ public class ChatModel {
     private String receiverID;
     private String chatID;
 
-    public ChatModel(String senderID) {
-        this.senderID = senderID;
+    public ChatModel() {
     }
 
     public ChatModel(String senderID, String receiverID, String chatID) {

@@ -7,7 +7,7 @@ import java.util.Calendar;
  * Created by User on 005 05.10.17.
  */
 
-public class Message {
+public class Message extends ChatModel{
     private String authorID;
     private String messageID;
     private String messageText;
