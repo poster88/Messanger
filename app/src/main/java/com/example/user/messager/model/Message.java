@@ -7,20 +7,18 @@ import java.util.Calendar;
  * Created by User on 005 05.10.17.
  */
 
-public class Message extends ChatModel{
+public class Message {
     private String authorID;
-    private String messageID;
     private String messageText;
     private String messageTime;
 
     public Message() {
     }
 
-    public Message(String authorID, String messageID, String messageText, String messageTime) {
+    public Message(String authorID, String messageText) {
         this.authorID = authorID;
-        this.messageID = messageID;
         this.messageText = messageText;
-        this.messageTime = messageTime;
+        this.messageTime = setMessageTime();
     }
 
     public String getAuthorID() {
@@ -29,14 +27,6 @@ public class Message extends ChatModel{
 
     public void setAuthorID(String authorID) {
         this.authorID = authorID;
-    }
-
-    public String getMessageID() {
-        return messageID;
-    }
-
-    public void setMessageID(String messageID) {
-        this.messageID = messageID;
     }
 
     public String getMessageText() {

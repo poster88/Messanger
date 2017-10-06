@@ -1,29 +1,21 @@
 package com.example.user.messager.model;
 
+import java.util.Map;
+
 /**
  * Created by User on 005 05.10.17.
  */
 
 public class ChatModel {
-    private String senderID;
     private String receiverID;
-    private String chatID;
+    private Map<String, Message> messageList;
 
     public ChatModel() {
     }
 
-    public ChatModel(String senderID, String receiverID, String chatID) {
-        this.senderID = senderID;
+    public ChatModel(String receiverID, Map<String, Message> messageList) {
         this.receiverID = receiverID;
-        this.chatID = chatID;
-    }
-
-    public String getSenderID() {
-        return senderID;
-    }
-
-    public void setSenderID(String senderID) {
-        this.senderID = senderID;
+        this.messageList = messageList;
     }
 
     public String getReceiverID() {
@@ -34,11 +26,11 @@ public class ChatModel {
         this.receiverID = receiverID;
     }
 
-    public String getChatID() {
-        return chatID;
+    public Map<String, Message> getMessageList() {
+        return messageList;
     }
 
-    public void setChatID(String chatID) {
-        this.chatID = chatID;
+    public void setMessageList(Map<String, Message> messageList) {
+        this.messageList = messageList;
     }
 }

@@ -1,29 +1,40 @@
 package com.example.user.messager.model;
 
 
-import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Created by User on 005 05.10.17.
  */
 
 public class MessagesTable {
-    private ArrayList<ChatModel> chatModels;
-    private ArrayList<Chats> chatsArrayList;
+    private Map<String, Map<String, Map<String, Message>>> ReceiverList;
+    private Map<String, Map<String, Message>> receiverChat;
+    private Map<String, Message> messages;
 
-    public ArrayList<ChatModel> getChatModels() {
-        return chatModels;
+
+    public MessagesTable() {
+
     }
 
-    public void setChatModels(ArrayList<ChatModel> chatModels) {
-        this.chatModels = chatModels;
+    public MessagesTable(Map<String, Map<String, Map<String, Message>>> receiverList) {
+        ReceiverList = receiverList;
     }
 
-    public ArrayList<Chats> getChatsArrayList() {
-        return chatsArrayList;
+    public Map<String, Map<String, Map<String, Message>>> ReceiverListToMap(String currentUserID, Map<String, Map<String, Message>> receiverChat){
+        Map<String, Map<String, Map<String, Message>>> result = new HashMap<>();
+        result.put(currentUserID, receiverChat);
+        return result;
     }
 
-    public void setChatsArrayList(ArrayList<Chats> chatsArrayList) {
-        this.chatsArrayList = chatsArrayList;
+    //public void showChat(String currentUserID, String receiverUserID, )
+
+    public void setReceiverList(Map<String, Map<String, Map<String, Message>>> receiverList) {
+        ReceiverList = receiverList;
+    }
+
+    public Map<String, Map<String, Map<String, Message>>> getReceiverList() {
+        return ReceiverList;
     }
 }
