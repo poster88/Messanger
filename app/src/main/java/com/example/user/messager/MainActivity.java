@@ -7,8 +7,8 @@ import com.example.user.messager.model.Message;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,49 +24,37 @@ public class MainActivity extends AppCompatActivity {
             "user_id_4"
     };
 
+    private static String userID = null;
+    private static String chatLink = null;
+    private ArrayList<String> userChatList;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        /*Map<String, Message> messages = new HashMap<>();
-        messages.put(database.getReference().push().getKey(), new Message("author", "message_text"));
-        messages.put(database.getReference().push().getKey(), new Message("author", "message_text"));
-        messages.put(database.getReference().push().getKey(), new Message("author", "message_text"));
-        messages.put(database.getReference().push().getKey(), new Message("author", "message_text"));
-
-        Map<String, Map<String, Message>> receiverChat1 = new HashMap<>();
-        receiverChat1.put(users[1], messages);
-        receiverChat1.put(users[2], messages);
-        receiverChat1.put(users[3], messages);
-
-        Map<String, Map<String, Message>> receiverChat2 = new HashMap<>();
-        receiverChat2.put(users[0], messages);
-        receiverChat2.put(users[2], messages);
-        receiverChat2.put(users[3], messages);
-
-        Map<String, Map<String, Message>> receiverChat3 = new HashMap<>();
-        receiverChat3.put(users[0], messages);
-        receiverChat3.put(users[3], messages);
-        receiverChat3.put(users[1], messages);
-
-        Map<String, Map<String, Message>> receiverChat4 = new HashMap<>();
-        receiverChat4.put(users[1], messages);
-        receiverChat4.put(users[2], messages);
-        receiverChat4.put(users[0], messages);
-
-        Map<String, Map<String, Map<String, Message>>> receiversList = new HashMap<>();
-        receiversList.put(users[0], receiverChat1);
-        receiversList.put(users[1], receiverChat2);
-        receiversList.put(users[2], receiverChat3);
-        receiversList.put(users[3], receiverChat4);*/
-
         Map<String, String> receivers = new HashMap<>();
-        receivers.put(users[1], "chat_link");
+        receivers.put(users[0], "chat_link");
 
         Map<String, Object> userChats = new HashMap<>();
-        userChats.put(users[0], receivers);
+        userChats.put(users[1], receivers);
 
+        Map<String, Object> messages = new HashMap<>();
+        messages.put(database.getReference().push().getKey(), new Message(users[0], "text message to user_id_2"));
+        messages.put(database.getReference().push().getKey(), new Message(users[0], "text message to user_id_2"));
+        messages.put(database.getReference().push().getKey(), new Message(users[0], "text message to user_id_2"));
+
+        Map<String, Object> chatArchive = new HashMap<>();
+        chatArchive.put("chat_link", messages);
+
+        userID = users[0];
+
+        if (userID != null){
+            showMyChatList();
+        }else {
+            System.out.println("register first!");
+        }
+        //database.getReference(CHAT_ARCHIVE).updateChildren(chatArchive);
         //database.getReference(CHAT_ID_TABLE).updateChildren(userChats);
         /*database.getReference(MESSAGES_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -80,10 +68,6 @@ public class MainActivity extends AppCompatActivity {
                 System.out.println(databaseError.toString());
             }
         });*/
-
-        //showChatWithUser("current_user_id_1", "receiver_id_3");
-        //sendMessageToUser("user_id_2", "user_id_1", "test text from user_id_2");
-        showMyChatList();
     }
 
     /*public void showChatWithUser(String senderID, String receiverID){
@@ -106,19 +90,58 @@ public class MainActivity extends AppCompatActivity {
         //database.getReference(MESSAGES_TABLE).child(receiverID).child(senderID).push().setValue(message);
     }
 
-    public void showMyChatList(){
-        database.getReference(CHAT_ID_TABLE).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot data: dataSnapshot.getChildren()) {
-                    System.out.println("chat with " + data.getKey() + " is exist");
-                }
-            }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+    private ChildValueListener getListData = new ChildValueListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            System.out.println(dataSnapshot + " " + s + " - onChildAdded");
+        }
 
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            System.out.println(dataSnapshot + " " + s + " - onChildChanged");
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            System.out.println(dataSnapshot + " " + " - onChildRemoved");
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            System.out.println(dataSnapshot + " " + s + " - onChildMoved");
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+            super.onCancelled(databaseError);
+        }
+    };
+
+    private void innitChatList(){
+        database.getReference(CHAT_ARCHIVE).child(chatLink).addChildEventListener(getListData);
+    }
+
+    private void showChatList(DataSnapshot data){
+        Map<String, Object> chatMap = (Map<String, Object>) data.getValue();
+        userChatList = new ArrayList<>();
+        for (Map.Entry<String, Object> map: chatMap.entrySet()) {
+            userChatList.add(map.getKey());
+        }
+    }
+
+    private ValueListener showUserChatListListener = new ValueListener() {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            if (dataSnapshot.exists()){
+                showChatList(dataSnapshot);
+                return;
             }
-        });
+            System.out.println("no chat with " + userID);
+        }
+    };
+
+    private void showMyChatList(){
+        database.getReference(CHAT_ID_TABLE).child(userID).addListenerForSingleValueEvent(showUserChatListListener);
     }
 }
