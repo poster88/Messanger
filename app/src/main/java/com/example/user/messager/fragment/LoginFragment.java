@@ -2,13 +2,12 @@ package com.example.user.messager.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
 
 import com.example.user.messager.R;
 
@@ -23,35 +22,27 @@ public class LoginFragment extends BaseFragment{
     @BindView(R.id.userLoginEdit) EditText userLoginET;
     @BindView(R.id.userPasswordEdit) EditText userPasswordET;
 
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.login_fragment, container, false);
+        bindFragment(view);
         return view;
     }
 
     @OnClick({R.id.loginBtn, R.id.registrationBtn})
     public void loginAction(Button button){
-        if (!validationFields(userLoginET.getText().toString(), userPasswordET.getText().toString())){
+        if (button.getId() == R.id.registrationBtn){
+            //replaceFragment(getTargetFragment(), new RegistrationFragment());
             return;
         }
-        Fragment fragment;
-        if (button.getId() == R.id.loginBtn){
-            fragment = new ChatListFragment();
-        }else {
-            fragment = new RegistrationFragment();
+        if (!validationFields(userLoginET.getText().toString(), userPasswordET.getText().toString())){
+            //// TODO: 012 12.10.17 add auth
+            replaceFragment(getTargetFragment(), new ChatListFragment());
         }
-        replaceFragment(fragment);
     }
 
-    private boolean validationFields(String login, String password) {
-        if (login.length() > 0 && password.length() > 0){
-            return true;
-        }
-        Toast.makeText(getContext(), "Fields aren't valid", Toast.LENGTH_SHORT).show();
-        return false;
-    }
+
 
 
 }

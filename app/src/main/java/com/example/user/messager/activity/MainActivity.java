@@ -2,9 +2,12 @@ package com.example.user.messager.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 
 import com.example.user.messager.fragment.ChatListFragment;
 import com.example.user.messager.fragment.LoginFragment;
+import com.example.user.messager.fragment.RegistrationFragment;
 import com.example.user.messager.listener.ChildValueListener;
 import com.example.user.messager.R;
 import com.example.user.messager.listener.ValueListener;
@@ -37,6 +40,9 @@ public class MainActivity extends BaseActivity{
 
     private FirebaseAuth auth;
     private FirebaseUser user;
+
+    public FragmentManager fm = getSupportFragmentManager();
+    public FragmentTransaction ft = fm.beginTransaction();
 
 
     @Override
@@ -165,7 +171,7 @@ public class MainActivity extends BaseActivity{
     protected void onStart() {
         super.onStart();
         user = auth.getCurrentUser();
-        checkUserAuth(user);
+        //checkUserAuth(user);
     }
 
     private void checkUserAuth(FirebaseUser user) {
@@ -175,7 +181,9 @@ public class MainActivity extends BaseActivity{
         }else {
             fragment = new LoginFragment();
         }
-        changeFragment(fragment);
+        ft.replace(R.id.container, fragment);
+        ft.commit();
+        //changeFragment(fragment);
     }
 
     @Override
