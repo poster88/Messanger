@@ -1,10 +1,16 @@
 package com.example.user.messager.fragment;
 
+import android.app.ProgressDialog;
+import android.net.Uri;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.View;
-import android.widget.Toast;
+import android.widget.ImageView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
+import com.example.user.messager.R;
+import com.example.user.messager.utils.CircleTransform;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
@@ -15,43 +21,50 @@ import butterknife.Unbinder;
  */
 
 public class BaseFragment extends Fragment{
-
-    protected final static int REQUEST_READ_PERMISSION = 9003;
-    protected final static int PHOTO_REQUEST = 9002;
     private Unbinder unbinder;
+    protected ProgressDialog progressDialog;
 
-    @Override
-    public void onDestroyView() {
-        if(this.unbinder != null){
-            this.unbinder.unbind();
-        }
-        super.onDestroyView();
+    protected void bindFragment(Object target, View view){
+        unbinder = ButterKnife.bind(target, view);
     }
 
-    protected void bindFragment(View view){
-        unbinder = ButterKnife.bind(view);
+    protected void setRoundImageToView(Uri uri, ImageView view) {
+        Glide.with(this)
+                .load(uri)
+                .crossFade()
+                .thumbnail(0.5f)
+                .bitmapTransform(new CircleTransform(getContext()))
+                .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
     }
 
-    protected void replaceFragment(Fragment currentFragment, Fragment fragmentToReplace){
-        FragmentManager fragmentManager = getFragmentManager();
-        FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.replace(currentFragment.getId(), fragmentToReplace);
+    protected void replaceFragments(Fragment fragment){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment);
+        ft.addToBackStack(fragment.getTag());
         ft.commit();
     }
 
-    protected boolean validationFields(String login, String password) {
-        if (login.length() > 0 && password.length() > 0){
-            return true;
+    protected void showProgressDialog(String msg) {
+        if (progressDialog == null) {
+            progressDialog = new ProgressDialog(getContext());
+            progressDialog.setMessage(msg);
+            progressDialog.setCancelable(false);
+            progressDialog.setIndeterminate(true);
         }
-        Toast.makeText(getContext(), "Fields aren't valid", Toast.LENGTH_SHORT).show();
-        return false;
+        progressDialog.show();
     }
 
-    protected boolean validationField(String text) {
-        if (text.length() > 0 ){
-            return true;
+    protected void hideProgressDialog() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
         }
-        Toast.makeText(getContext(), "Fields aren't valid", Toast.LENGTH_SHORT).show();
-        return false;
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        if (unbinder != null){
+            unbinder.unbind();
+        }
     }
 }

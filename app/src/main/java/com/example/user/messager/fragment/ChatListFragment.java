@@ -8,4 +8,8 @@ import android.support.v4.app.Fragment;
 
 public class ChatListFragment extends Fragment{
 
+    public static ChatListFragment newInstance(){
+        return new ChatListFragment();
+    }
+
 }
