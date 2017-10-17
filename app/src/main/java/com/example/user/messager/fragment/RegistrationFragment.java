@@ -1,7 +1,6 @@
 package com.example.user.messager.fragment;
 
 import android.Manifest;
-import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -34,14 +33,13 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
     @BindView(R.id.regUserNameEdit) EditText userName;
     @BindView(R.id.regUserEmailEdit) EditText userEmail;
 
-    private RegistrationTask registrationAsynkTask;
-    private ProgressDialog progressDialog;
+    private RegistrationTask registrationAsyncTask;
     private boolean isTaskRunning = false;
 
     private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            registrationAsynkTask.cancel(true);
+            registrationAsyncTask.cancel(true);
             progressDialog.dismiss();
         }
     };
@@ -68,13 +66,8 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (isTaskRunning){
-            progressDialog = new ProgressDialog(getActivity());
-            progressDialog.setTitle("Registration");
-            progressDialog.setMessage("Please wait a moment!");
-            progressDialog.setIndeterminate(true);
-            progressDialog.setCancelable(false);
-            progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", cancelDialogListener);
-            progressDialog.show();
+            showProgressDialog(getActivity(), "Registration", "Please wait a moment!",
+                    true, false, cancelDialogListener, "Cancel", null, null);
         }
     }
 
@@ -124,21 +117,16 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
             return;
         }
         if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
-            registrationAsynkTask = new RegistrationTask(this);
-            registrationAsynkTask.execute();
+            registrationAsyncTask = new RegistrationTask(this);
+            registrationAsyncTask.execute();
         }
     }
 
     @Override
     public void onTaskStarted() {
         isTaskRunning = true;
-        progressDialog = new ProgressDialog(getActivity());
-        progressDialog.setTitle("Registration");
-        progressDialog.setMessage("Please wait a moment!");
-        progressDialog.setIndeterminate(true);
-        progressDialog.setCancelable(false);
-        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, "Cancel", cancelDialogListener);
-        progressDialog.show();
+        showProgressDialog(getActivity(), "Registration", "Please wait a moment!",
+                true, false, cancelDialogListener, "Cancel", null, null);
     }
 
     @Override
@@ -151,9 +139,7 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
 
     @Override
     public void onDetach() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
+        hideProgressDialog();
         super.onDetach();
     }
 

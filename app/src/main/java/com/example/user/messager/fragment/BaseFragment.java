@@ -1,6 +1,8 @@
 package com.example.user.messager.fragment;
 
+import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -44,13 +46,17 @@ public class BaseFragment extends Fragment{
         ft.commit();
     }
 
-    protected void showProgressDialog(String msg) {
-        if (progressDialog == null) {
-            progressDialog = new ProgressDialog(getContext());
-            progressDialog.setMessage(msg);
-            progressDialog.setCancelable(false);
-            progressDialog.setIndeterminate(true);
-        }
+    protected void showProgressDialog(
+            Activity activity, String title, String message, boolean isIndeterminate, boolean isCancelable,
+            DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
+            DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel) {
+        progressDialog = new ProgressDialog(activity);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage(message);
+        progressDialog.setIndeterminate(isIndeterminate);
+        progressDialog.setCancelable(isCancelable);
+        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeBtnLabel, negativeBtn);
+        progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveBtnLabel, positiveBtn);
         progressDialog.show();
     }
 
