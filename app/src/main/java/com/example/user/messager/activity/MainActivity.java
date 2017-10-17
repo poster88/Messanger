@@ -15,15 +15,15 @@ import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
 
 
-public class LoginActivity extends AppCompatActivity implements FirebaseAuth.AuthStateListener{
+public class MainActivity extends AppCompatActivity {
     private FirebaseDatabase database;
     private FirebaseAuth auth;
     private FirebaseUser user;
 
-    private FirebaseAuth.AuthStateListener stateListener = new FirebaseAuth.AuthStateListener() {
+    private FirebaseAuth.AuthStateListener authListener = new FirebaseAuth.AuthStateListener() {
         @Override
         public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-            Log.d(Utils.TAG, "onAuthStateChanged : user = " + user);
+            user = firebaseAuth.getCurrentUser();
         }
     };
 
@@ -44,20 +44,21 @@ public class LoginActivity extends AppCompatActivity implements FirebaseAuth.Aut
         }
     }
 
+    private void checkUserData(FirebaseUser user){
+        if (user != null){
+
+        }
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
-        auth.addAuthStateListener(stateListener);
+        auth.addAuthStateListener(authListener);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        auth.removeAuthStateListener(stateListener);
-    }
-
-    @Override
-    public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-        user = firebaseAuth.getCurrentUser();
+        auth.removeAuthStateListener(authListener);
     }
 }

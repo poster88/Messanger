@@ -44,7 +44,7 @@
         android:layout_gravity="center_horizontal">
 
         <EditText
-            android:id="@+id/passEdit"
+            android:id="@+id/regPassEdit"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="password"

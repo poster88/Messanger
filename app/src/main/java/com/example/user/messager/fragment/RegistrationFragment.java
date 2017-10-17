@@ -11,6 +11,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +21,10 @@ import android.widget.ImageView;
 
 import com.example.user.messager.R;
 import com.example.user.messager.utils.Utils;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthResult;
+import com.google.firebase.auth.FirebaseAuth;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -28,19 +33,31 @@ import butterknife.OnClick;
  * Created by User on 011 11.10.17.
  */
 
-public class RegistrationFragment extends BaseFragment implements TaskListener {
+public class RegistrationFragment extends BaseFragment {
     @BindView(R.id.regUserImage) ImageView userImage;
     @BindView(R.id.regUserNameEdit) EditText userName;
     @BindView(R.id.regUserEmailEdit) EditText userEmail;
+    @BindView(R.id.regPassEdit) EditText userPass;
 
-    private RegistrationTask registrationAsyncTask;
     private boolean isTaskRunning = false;
 
     private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
         @Override
         public void onClick(DialogInterface dialogInterface, int i) {
-            registrationAsyncTask.cancel(true);
-            progressDialog.dismiss();
+            RegistrationFragment.super.progressDialog.dismiss();
+        }
+    };
+
+    private OnCompleteListener regCompleteListener = new OnCompleteListener() {
+        @Override
+        public void onComplete(@NonNull Task task) {
+            Log.d(Utils.TAG, "onComplete task is " + task.isSuccessful());
+            onTaskFinished();
+            if (task.isSuccessful()){
+                RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
+            }else {
+                Log.d(Utils.TAG, "onComplete task " + task.getException());
+            }
         }
     };
 
@@ -117,22 +134,21 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
             return;
         }
         if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
-            registrationAsyncTask = new RegistrationTask(this);
-            registrationAsyncTask.execute();
+            onTaskStarted();
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
+                    .addOnCompleteListener(regCompleteListener);
         }
     }
 
-    @Override
     public void onTaskStarted() {
         isTaskRunning = true;
         showProgressDialog(getActivity(), "Registration", "Please wait a moment!",
                 true, false, cancelDialogListener, "Cancel", null, null);
     }
 
-    @Override
-    public void onTaskFinished(String result) {
-        if (progressDialog != null) {
-            progressDialog.dismiss();
+    public void onTaskFinished() {
+        if (RegistrationFragment.super.progressDialog != null) {
+            RegistrationFragment.super.progressDialog.dismiss();
         }
         isTaskRunning = false;
     }
@@ -141,40 +157,5 @@ public class RegistrationFragment extends BaseFragment implements TaskListener {
     public void onDetach() {
         hideProgressDialog();
         super.onDetach();
-    }
-
-    private class RegistrationTask extends AsyncTask<Integer, Integer, String> {
-        private final TaskListener listener;
-
-        public RegistrationTask(TaskListener listener) {
-            this.listener = listener;
-        }
-
-        @Override
-        protected void onPreExecute() {
-            listener.onTaskStarted();
-        }
-
-        @Override
-        protected String doInBackground(Integer... integers) {
-            for (int i = 0; i < 8; i++) {
-                try {
-                    Thread.sleep(1000);
-                }catch (Exception e){
-                    e.printStackTrace();
-                }
-                if (isCancelled()){
-                    isTaskRunning = false;
-                    return null;
-                }
-                System.out.println(i);
-            }
-            return null;
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-           listener.onTaskFinished(result);
-        }
     }
 }
