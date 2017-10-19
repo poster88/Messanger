@@ -1,11 +1,15 @@
 package com.example.user.messager.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
@@ -17,13 +21,24 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.user.messager.R;
 import com.example.user.messager.model.User;
 import com.example.user.messager.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
+
+import java.io.ByteArrayOutputStream;
+import java.util.HashMap;
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -39,6 +54,8 @@ public class RegistrationFragment extends BaseFragment {
     @BindView(R.id.regPassEdit) EditText userPass;
 
     private boolean isTaskRunning = false;
+    private Uri photoUri;
+    private String photoUrl;
 
     private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
         @Override
@@ -51,7 +68,7 @@ public class RegistrationFragment extends BaseFragment {
         @Override
         public void onComplete(@NonNull Task task) {
             if (task.isSuccessful()){
-                setUserDataToDB();
+                getUserDataFromWidgets();
                 RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
             }else {
                 Log.d(Utils.TAG, "onComplete task " + task.getException());
@@ -60,11 +77,60 @@ public class RegistrationFragment extends BaseFragment {
         }
     };
 
-    private void setUserDataToDB() {
+    private OnSuccessListener<UploadTask.TaskSnapshot> addPhotoSuccessListener = new OnSuccessListener<UploadTask.TaskSnapshot>() {
+        @Override
+        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            @SuppressWarnings("VisibleForTests") String getDownloadUrl = taskSnapshot.getDownloadUrl().toString();
+            photoUrl = getDownloadUrl;
+
+        }
+    };
+
+    private OnFailureListener addPhotoFailureListener = new OnFailureListener() {
+        @Override
+        public void onFailure(@NonNull Exception e) {
+            Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    };
+
+    private void getUserDataFromWidgets() {
         User user = new User();
         user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
         user.setUserName(userName.getText().toString());
-        user.setUserEmail(userName.getText().toString());
+        user.setUserEmail(userEmail.getText().toString());
+        if (isDefaultPhoto(userImage, R.drawable.user_anonymous, getActivity())){
+            user.setImageUrl(Utils.PHOTO_DEFAULT);
+        }else {
+            //TODO: wait for responce in addPhotoSuccessListener
+            saveUserDataToDB(photoUri);
+            user.setImageUrl(photoUrl);
+        }
+        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        Map<String, Object> userInfoMap = new HashMap<>();
+        userInfoMap.put(FirebaseAuth.getInstance().getCurrentUser().getUid(), user);
+        db.getReference(Utils.USER_INFO).updateChildren(user.toMap());
+    }
+
+    private void saveUserDataToDB(Uri photoUri) {
+        FirebaseStorage fs = FirebaseStorage.getInstance();
+        StorageReference sr = fs.getReference(Utils.USERS_IMAGES).child(photoUri.getLastPathSegment());
+        userImage.setDrawingCacheEnabled(true);
+        userImage.buildDrawingCache();
+        Bitmap bitmap = userImage.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        byte[] data = baos.toByteArray();
+        UploadTask uTask = sr.putBytes(data);
+        uTask.addOnFailureListener(addPhotoFailureListener);
+        uTask.addOnSuccessListener(addPhotoSuccessListener);
+    }
+
+    private boolean isDefaultPhoto(ImageView imageView, @DrawableRes int defPhotoID, Context context){
+        if (imageView.getDrawable().getConstantState() == ContextCompat.getDrawable(
+                context, defPhotoID).getConstantState()){
+            return true;
+        }
+        return false;
     }
 
     public static RegistrationFragment newInstance(){
@@ -82,10 +148,6 @@ public class RegistrationFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
-
-        if (userImage.getTag().equals(ContextCompat.getDrawable(getActivity(),R.drawable.user_anonymous))){
-            Log.d(Utils.TAG, "image is user annon ");
-        }
         return view;
     }
 
@@ -132,7 +194,8 @@ public class RegistrationFragment extends BaseFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Utils.PHOTO_REQUEST){
             if (resultCode == Utils.RESULT_OK){
-                super.setRoundImageToView(data.getData(), userImage);
+                photoUri = data.getData();
+                super.setRoundImageToView(photoUri, userImage);
             }
         }
     }
