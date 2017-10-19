@@ -8,7 +8,6 @@ import android.support.v7.app.AppCompatActivity;
 import com.example.user.messager.fragment.ChatListFragment;
 import com.example.user.messager.fragment.LoginFragment;
 import com.example.user.messager.R;
-import com.example.user.messager.utils.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
