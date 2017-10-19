@@ -26,6 +26,7 @@ public class ChatListFragment extends BaseFragment{
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chatlist_fragment, container, false);
+        bindFragment(this, view);
         return view;
     }
 

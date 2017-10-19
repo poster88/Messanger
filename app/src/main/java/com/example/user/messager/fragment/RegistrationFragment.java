@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -20,10 +19,10 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.example.user.messager.R;
+import com.example.user.messager.model.User;
 import com.example.user.messager.utils.Utils;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
 import butterknife.BindView;
@@ -51,15 +50,22 @@ public class RegistrationFragment extends BaseFragment {
     private OnCompleteListener regCompleteListener = new OnCompleteListener() {
         @Override
         public void onComplete(@NonNull Task task) {
-            Log.d(Utils.TAG, "onComplete task is " + task.isSuccessful());
-            onTaskFinished();
             if (task.isSuccessful()){
+                setUserDataToDB();
                 RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
             }else {
                 Log.d(Utils.TAG, "onComplete task " + task.getException());
             }
+            onTaskFinished();
         }
     };
+
+    private void setUserDataToDB() {
+        User user = new User();
+        user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        user.setUserName(userName.getText().toString());
+        user.setUserEmail(userName.getText().toString());
+    }
 
     public static RegistrationFragment newInstance(){
         return new RegistrationFragment();
@@ -76,6 +82,10 @@ public class RegistrationFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
+
+        if (userImage.getTag().equals(ContextCompat.getDrawable(getActivity(),R.drawable.user_anonymous))){
+            Log.d(Utils.TAG, "image is user annon ");
+        }
         return view;
     }
 
