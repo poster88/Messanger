@@ -14,7 +14,6 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,10 +25,8 @@ import android.widget.Toast;
 import com.example.user.messager.R;
 import com.example.user.messager.model.User;
 import com.example.user.messager.utils.Utils;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
@@ -55,7 +52,6 @@ public class RegistrationFragment extends BaseFragment {
 
     private boolean isTaskRunning = false;
     private Uri photoUri;
-    private String photoUrl;
 
     private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
         @Override
@@ -64,16 +60,10 @@ public class RegistrationFragment extends BaseFragment {
         }
     };
 
-    private OnCompleteListener regCompleteListener = new OnCompleteListener() {
+    private OnSuccessListener regSuccessListener = new OnSuccessListener() {
         @Override
-        public void onComplete(@NonNull Task task) {
-            if (task.isSuccessful()){
-                getUserDataFromWidgets();
-                RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
-            }else {
-                Log.d(Utils.TAG, "onComplete task " + task.getException());
-            }
-            onTaskFinished();
+        public void onSuccess(Object o) {
+            updateStoragePhoto(photoUri);
         }
     };
 
@@ -81,48 +71,45 @@ public class RegistrationFragment extends BaseFragment {
         @Override
         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
             @SuppressWarnings("VisibleForTests") String getDownloadUrl = taskSnapshot.getDownloadUrl().toString();
-            photoUrl = getDownloadUrl;
-
+            saveUserInRealTimeDB(new User(), getDownloadUrl);
         }
     };
 
-    private OnFailureListener addPhotoFailureListener = new OnFailureListener() {
+    private OnFailureListener failureListener = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception e) {
             Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            onTaskFinished();
         }
     };
 
-    private void getUserDataFromWidgets() {
-        User user = new User();
+    private void saveUserInRealTimeDB(User user, String downloadUrl){
         user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
         user.setUserName(userName.getText().toString());
         user.setUserEmail(userEmail.getText().toString());
-        if (isDefaultPhoto(userImage, R.drawable.user_anonymous, getActivity())){
-            user.setImageUrl(Utils.PHOTO_DEFAULT);
-        }else {
-            //TODO: wait for responce in addPhotoSuccessListener
-            saveUserDataToDB(photoUri);
-            user.setImageUrl(photoUrl);
-        }
-        FirebaseDatabase db = FirebaseDatabase.getInstance();
+        user.setImageUrl(downloadUrl);
         Map<String, Object> userInfoMap = new HashMap<>();
-        userInfoMap.put(FirebaseAuth.getInstance().getCurrentUser().getUid(), user);
-        db.getReference(Utils.USER_INFO).updateChildren(user.toMap());
+        userInfoMap.put(user.getUserID(), user);
+        FirebaseDatabase.getInstance().getReference(Utils.USER_INFO).updateChildren(user.toMap());
+        onTaskFinished();
     }
 
-    private void saveUserDataToDB(Uri photoUri) {
-        FirebaseStorage fs = FirebaseStorage.getInstance();
-        StorageReference sr = fs.getReference(Utils.USERS_IMAGES).child(photoUri.getLastPathSegment());
-        userImage.setDrawingCacheEnabled(true);
-        userImage.buildDrawingCache();
-        Bitmap bitmap = userImage.getDrawingCache();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-        byte[] data = baos.toByteArray();
-        UploadTask uTask = sr.putBytes(data);
-        uTask.addOnFailureListener(addPhotoFailureListener);
-        uTask.addOnSuccessListener(addPhotoSuccessListener);
+    private void updateStoragePhoto(Uri photoUri) {
+        if (photoUri != null){
+            FirebaseStorage fs = FirebaseStorage.getInstance();
+            StorageReference sr = fs.getReference(Utils.USERS_IMAGES).child(photoUri.getLastPathSegment());
+            userImage.setDrawingCacheEnabled(true);
+            userImage.buildDrawingCache();
+            Bitmap bitmap = userImage.getDrawingCache();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
+            UploadTask uTask = sr.putBytes(data);
+            uTask.addOnFailureListener(failureListener);
+            uTask.addOnSuccessListener(addPhotoSuccessListener);
+            return;
+        }
+        saveUserInRealTimeDB(new User(), Utils.PHOTO_DEFAULT);
     }
 
     private boolean isDefaultPhoto(ImageView imageView, @DrawableRes int defPhotoID, Context context){
@@ -149,6 +136,14 @@ public class RegistrationFragment extends BaseFragment {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
         return view;
+    }
+
+    @Override
+    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        if (savedInstanceState != null && photoUri != null){
+            super.setRoundImageToView(photoUri, userImage);
+        }
     }
 
     @Override
@@ -209,7 +204,8 @@ public class RegistrationFragment extends BaseFragment {
         if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
             onTaskStarted();
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
-                    .addOnCompleteListener(regCompleteListener);
+                    .addOnSuccessListener(regSuccessListener)
+                    .addOnFailureListener(failureListener);
         }
     }
 
