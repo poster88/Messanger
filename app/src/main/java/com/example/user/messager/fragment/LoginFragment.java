@@ -1,7 +1,9 @@
 package com.example.user.messager.fragment;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,6 +11,7 @@ import android.widget.Button;
 import android.widget.EditText;
 
 import com.example.user.messager.R;
+import com.example.user.messager.utils.Utils;
 import com.google.firebase.auth.FirebaseAuth;
 
 import butterknife.BindView;
@@ -31,7 +34,7 @@ public class LoginFragment extends BaseFragment{
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null){
             if (FirebaseAuth.getInstance().getCurrentUser() != null){
-                super.replaceFragments(new ChatListFragment());
+                LoginFragment.super.replaceFragments(new ChatListFragment());
             }
         }
     }
@@ -47,12 +50,8 @@ public class LoginFragment extends BaseFragment{
     @OnClick({R.id.loginBtn, R.id.registrationBtn})
     public void loginAction(Button button){
         if (button.getId() == R.id.registrationBtn){
-            super.replaceFragments(RegistrationFragment.newInstance());
+            super.replaceFragments(RegistrationFragment.newInstance(), null);
             return;
         }
     }
-
-
-
-
 }

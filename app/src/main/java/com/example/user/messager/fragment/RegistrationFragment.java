@@ -92,6 +92,7 @@ public class RegistrationFragment extends BaseFragment {
         userInfoMap.put(user.getUserID(), user);
         FirebaseDatabase.getInstance().getReference(Utils.USER_INFO).updateChildren(user.toMap());
         onTaskFinished();
+        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
     }
 
     private void updateStoragePhoto(Uri photoUri) {

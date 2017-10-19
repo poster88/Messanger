@@ -46,6 +46,13 @@ public class BaseFragment extends Fragment{
         ft.commit();
     }
 
+    protected void replaceFragments(Fragment fragment, String tag){
+        FragmentTransaction ft = getFragmentManager().beginTransaction();
+        ft.replace(R.id.container, fragment);
+        ft.addToBackStack(tag);
+        ft.commit();
+    }
+
     protected void showProgressDialog(
             Activity activity, String title, String message, boolean isIndeterminate, boolean isCancelable,
             DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
