@@ -16,7 +16,7 @@ import butterknife.OnClick;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment{
+public class ChatListFragment extends BaseFragment {
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -33,6 +33,6 @@ public class ChatListFragment extends BaseFragment{
     @OnClick(R.id.logOutBtn)
     public void logOutAction(){
         FirebaseAuth.getInstance().signOut();
-        super.replaceFragments(LoginFragment.newInstance());
+        super.replaceFragments(LoginFragment.newInstance(), false);
     }
 }

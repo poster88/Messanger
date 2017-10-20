@@ -92,7 +92,7 @@ public class RegistrationFragment extends BaseFragment {
         userInfoMap.put(user.getUserID(), user);
         FirebaseDatabase.getInstance().getReference(Utils.USER_INFO).updateChildren(user.toMap());
         onTaskFinished();
-        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance());
+        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), true);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
@@ -203,10 +203,11 @@ public class RegistrationFragment extends BaseFragment {
             return;
         }
         if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
-            onTaskStarted();
+            RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), true);
+            /*onTaskStarted();
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
-                    .addOnFailureListener(failureListener);
+                    .addOnFailureListener(failureListener);*/
         }
     }
 

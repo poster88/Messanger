@@ -39,17 +39,12 @@ public class BaseFragment extends Fragment{
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
     }
 
-    protected void replaceFragments(Fragment fragment){
+    protected void replaceFragments(Fragment fragment, boolean isAddToBackStack){
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.container, fragment);
-        ft.addToBackStack(fragment.getTag());
-        ft.commit();
-    }
-
-    protected void replaceFragments(Fragment fragment, String tag){
-        FragmentTransaction ft = getFragmentManager().beginTransaction();
-        ft.replace(R.id.container, fragment);
-        ft.addToBackStack(tag);
+        if (isAddToBackStack){
+            ft.addToBackStack(null);
+        }
         ft.commit();
     }
 
