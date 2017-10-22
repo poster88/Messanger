@@ -20,9 +20,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
         if (savedInstanceState == null){
-
             FragmentTransaction ft = fm.beginTransaction();
             ft.add(R.id.container, LoginFragment.newInstance());
             ft.commit();
@@ -34,6 +32,10 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = fm.findFragmentById(R.id.container);
         if (fragment instanceof ChatListFragment){
             Log.d(Utils.TAG, "fragment instanceof ChatListFragment");
+            FragmentTransaction ft = fm.beginTransaction();
+            ft.replace(R.id.container, LoginFragment.newInstance());
+            ft.commit();
+            return;
         }
         // TODO: 20.10.2017 work a correct onBackPress / add
         super.onBackPressed();

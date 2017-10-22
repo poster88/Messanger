@@ -12,6 +12,9 @@ import android.os.Bundle;
 import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.LayoutInflater;
@@ -92,7 +95,7 @@ public class RegistrationFragment extends BaseFragment {
         userInfoMap.put(user.getUserID(), user);
         FirebaseDatabase.getInstance().getReference(Utils.USER_INFO).updateChildren(user.toMap());
         onTaskFinished();
-        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), true);
+        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), false);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
@@ -203,7 +206,7 @@ public class RegistrationFragment extends BaseFragment {
             return;
         }
         if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
-            RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), true);
+            RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), false);
             /*onTaskStarted();
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)

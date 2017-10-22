@@ -47,7 +47,7 @@ public class LoginFragment extends BaseFragment{
     @OnClick({R.id.loginBtn, R.id.registrationBtn})
     public void loginAction(Button button){
         if (button.getId() == R.id.registrationBtn){
-            super.replaceFragments(RegistrationFragment.newInstance(), false);
+            super.replaceFragments(RegistrationFragment.newInstance(), true);
             return;
         }
     }
