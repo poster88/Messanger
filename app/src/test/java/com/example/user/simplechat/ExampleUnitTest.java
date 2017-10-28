@@ -1,4 +1,4 @@
-package com.example.user.messager;
+package com.example.user.simplechat;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.example.user.messager.fragment;
+package com.example.user.simplechat.fragment;
 
 import android.support.v4.app.Fragment;
 

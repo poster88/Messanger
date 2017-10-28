@@ -1,4 +1,4 @@
-package com.example.user.messager.model;
+package com.example.user.simplechat.model;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;

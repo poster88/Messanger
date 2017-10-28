@@ -1,4 +1,4 @@
-package com.example.user.messager.listener;
+package com.example.user.simplechat.listener;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;

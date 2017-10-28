@@ -1,4 +1,4 @@
-package com.example.user.messager.app;
+package com.example.user.simplechat.app;
 
 import com.google.firebase.database.FirebaseDatabase;
 

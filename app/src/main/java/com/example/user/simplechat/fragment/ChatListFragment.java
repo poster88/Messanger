@@ -1,4 +1,4 @@
-package com.example.user.messager.fragment;
+package com.example.user.simplechat.fragment;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -6,7 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.example.user.messager.R;
+import com.example.user.simplechat.R;
 import com.google.firebase.auth.FirebaseAuth;
 
 import butterknife.OnClick;

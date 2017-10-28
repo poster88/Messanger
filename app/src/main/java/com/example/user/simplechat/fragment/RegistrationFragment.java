@@ -1,4 +1,4 @@
-package com.example.user.messager.fragment;
+package com.example.user.simplechat.fragment;
 
 import android.Manifest;
 import android.content.DialogInterface;
@@ -19,8 +19,8 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.example.user.messager.R;
-import com.example.user.messager.model.User;
+import com.example.user.simplechat.R;
+import com.example.user.simplechat.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;

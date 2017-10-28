@@ -1,4 +1,4 @@
-package com.example.user.messager.model;
+package com.example.user.simplechat.model;
 
 import java.util.Map;
 

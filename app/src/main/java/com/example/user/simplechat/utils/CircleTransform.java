@@ -1,4 +1,4 @@
-package com.example.user.messager.utils;
+package com.example.user.simplechat.utils;
 
 import android.content.Context;
 import android.graphics.Bitmap;

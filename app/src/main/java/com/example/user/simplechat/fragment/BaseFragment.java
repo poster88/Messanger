@@ -1,4 +1,4 @@
-package com.example.user.messager.fragment;
+package com.example.user.simplechat.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -13,8 +13,8 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.user.messager.R;
-import com.example.user.messager.utils.CircleTransform;
+import com.example.user.simplechat.R;
+import com.example.user.simplechat.utils.CircleTransform;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;

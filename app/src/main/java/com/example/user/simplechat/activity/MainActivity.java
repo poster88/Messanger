@@ -1,13 +1,13 @@
-package com.example.user.messager.activity;
+package com.example.user.simplechat.activity;
 
 import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 
-import com.example.user.messager.fragment.ChatListFragment;
-import com.example.user.messager.fragment.LoginFragment;
-import com.example.user.messager.R;
+import com.example.user.simplechat.fragment.ChatListFragment;
+import com.example.user.simplechat.fragment.LoginFragment;
+import com.example.user.simplechat.R;
 import com.google.firebase.auth.FirebaseAuth;
 
 
