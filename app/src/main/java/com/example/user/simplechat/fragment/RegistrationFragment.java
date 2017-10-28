@@ -1,7 +1,6 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -52,13 +51,6 @@ public class RegistrationFragment extends BaseFragment {
     public static RegistrationFragment newInstance(){
         return new RegistrationFragment();
     }
-
-    private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
-        @Override
-        public void onClick(DialogInterface dialogInterface, int i) {
-            RegistrationFragment.super.progressDialog.dismiss();
-        }
-    };
 
     private OnSuccessListener regSuccessListener = new OnSuccessListener() {
         @Override
@@ -144,9 +136,7 @@ public class RegistrationFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (isTaskRunning){
-            super.onTaskStarted(getActivity(),  "Registration", "Please wait a moment!",
-                    true, false, cancelDialogListener, "Cancel",
-                    null, null);
+            setRegistrationTask();
         }
     }
 
@@ -194,12 +184,16 @@ public class RegistrationFragment extends BaseFragment {
         }
         if (fieldValidation(userName) && fieldValidation(userEmail)){
             isTaskRunning = true;
-            super.onTaskStarted(getActivity(), "Registration", "Please wait a moment!",
-                    true, false, cancelDialogListener, "Cancel", null, null);
+            setRegistrationTask();
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
                     .addOnFailureListener(failureListener);
         }
+    }
+
+    private void setRegistrationTask(){
+        super.onTaskStarted(getActivity(), "Registration", "Please wait a moment!",
+                true, false, null, null, null, null);
     }
 
     @Override
