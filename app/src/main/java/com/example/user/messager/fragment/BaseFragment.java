@@ -6,7 +6,9 @@ import android.content.DialogInterface;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.text.TextUtils;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
@@ -22,7 +24,7 @@ import butterknife.Unbinder;
  * Created by User on 011 11.10.17.
  */
 
-public class BaseFragment extends Fragment{
+public class BaseFragment extends FragmentTitle {
     private Unbinder unbinder;
     protected ProgressDialog progressDialog;
 
@@ -39,19 +41,18 @@ public class BaseFragment extends Fragment{
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
     }
 
-    protected void replaceFragments(Fragment fragment, boolean isAddToBackStack){
+    protected void replaceFragments(Fragment fragment, String tag){
         FragmentTransaction ft = getFragmentManager().beginTransaction();
         ft.replace(R.id.container, fragment);
-        if (isAddToBackStack){
-            ft.addToBackStack(null);
-        }
+        ft.addToBackStack(tag);
         ft.commit();
     }
 
-    protected void showProgressDialog(
+    public void onTaskStarted(
             Activity activity, String title, String message, boolean isIndeterminate, boolean isCancelable,
             DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
-            DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel) {
+            DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel
+    ) {
         progressDialog = new ProgressDialog(activity);
         progressDialog.setTitle(title);
         progressDialog.setMessage(message);
@@ -62,10 +63,17 @@ public class BaseFragment extends Fragment{
         progressDialog.show();
     }
 
-    protected void hideProgressDialog() {
+    public void onTaskFinished() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }
+    }
+
+    protected boolean fieldValidation(EditText field){
+        if (!TextUtils.isEmpty(field.getText().toString())){
+            return true;
+        }
+        return false;
     }
 
     @Override

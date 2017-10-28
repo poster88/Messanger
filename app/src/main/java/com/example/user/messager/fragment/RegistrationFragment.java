@@ -1,7 +1,6 @@
 package com.example.user.messager.fragment;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -9,14 +8,9 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
-import android.support.annotation.DrawableRes;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
-import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,7 +21,6 @@ import android.widget.Toast;
 
 import com.example.user.messager.R;
 import com.example.user.messager.model.User;
-import com.example.user.messager.utils.Utils;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,8 +46,12 @@ public class RegistrationFragment extends BaseFragment {
     @BindView(R.id.regUserEmailEdit) EditText userEmail;
     @BindView(R.id.regPassEdit) EditText userPass;
 
-    private boolean isTaskRunning = false;
     private Uri photoUri;
+    private boolean isTaskRunning;
+
+    public static RegistrationFragment newInstance(){
+        return new RegistrationFragment();
+    }
 
     private DialogInterface.OnClickListener cancelDialogListener = new DialogInterface.OnClickListener() {
         @Override
@@ -83,6 +80,7 @@ public class RegistrationFragment extends BaseFragment {
         public void onFailure(@NonNull Exception e) {
             Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
             onTaskFinished();
+            isTaskRunning = false;
         }
     };
 
@@ -93,39 +91,31 @@ public class RegistrationFragment extends BaseFragment {
         user.setImageUrl(downloadUrl);
         Map<String, Object> userInfoMap = new HashMap<>();
         userInfoMap.put(user.getUserID(), user);
-        FirebaseDatabase.getInstance().getReference(Utils.USER_INFO).updateChildren(user.toMap());
+        FirebaseDatabase.getInstance().getReference(super.USER_INFO).updateChildren(user.toMap());
+
         onTaskFinished();
-        RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), false);
+        isTaskRunning = false;
+        super.replaceFragments(ChatListFragment.newInstance(user.getUserID()), super.CHAT_LIST_FRAG);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
         if (photoUri != null){
             FirebaseStorage fs = FirebaseStorage.getInstance();
-            StorageReference sr = fs.getReference(Utils.USERS_IMAGES).child(photoUri.getLastPathSegment());
+            StorageReference sr = fs.getReference(super.USERS_IMAGES).child(photoUri.getLastPathSegment());
+
             userImage.setDrawingCacheEnabled(true);
             userImage.buildDrawingCache();
             Bitmap bitmap = userImage.getDrawingCache();
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
             byte[] data = baos.toByteArray();
+
             UploadTask uTask = sr.putBytes(data);
             uTask.addOnFailureListener(failureListener);
             uTask.addOnSuccessListener(addPhotoSuccessListener);
             return;
         }
-        saveUserInRealTimeDB(new User(), Utils.PHOTO_DEFAULT);
-    }
-
-    private boolean isDefaultPhoto(ImageView imageView, @DrawableRes int defPhotoID, Context context){
-        if (imageView.getDrawable().getConstantState() == ContextCompat.getDrawable(
-                context, defPhotoID).getConstantState()){
-            return true;
-        }
-        return false;
-    }
-
-    public static RegistrationFragment newInstance(){
-        return new RegistrationFragment();
+        saveUserInRealTimeDB(new User(), super.PHOTO_DEFAULT);
     }
 
     @Override
@@ -154,19 +144,26 @@ public class RegistrationFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (isTaskRunning){
-            showProgressDialog(getActivity(), "Registration", "Please wait a moment!",
-                    true, false, cancelDialogListener, "Cancel", null, null);
+            super.onTaskStarted(getActivity(),  "Registration", "Please wait a moment!",
+                    true, false, cancelDialogListener, "Cancel",
+                    null, null);
         }
     }
 
     @OnClick(R.id.setImageBtn)
     public void setImageAction(){
-        requestPermissions();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, super.REQUEST_READ_PERMISSION);
+                return;
+            }
+        }
+        openFilePicker();
     }
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == Utils.REQUEST_READ_PERMISSION){
+        if (requestCode == super.REQUEST_READ_PERMISSION){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 openFilePicker();
             }
@@ -176,23 +173,13 @@ public class RegistrationFragment extends BaseFragment {
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, Utils.PHOTO_REQUEST);
-    }
-
-    private void requestPermissions() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Utils.REQUEST_READ_PERMISSION);
-                return;
-            }
-        }
-        openFilePicker();
+        startActivityForResult(intent, super.PHOTO_REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == Utils.PHOTO_REQUEST){
-            if (resultCode == Utils.RESULT_OK){
+        if (requestCode == super.PHOTO_REQUEST){
+            if (resultCode == super.RESULT_OK){
                 photoUri = data.getData();
                 super.setRoundImageToView(photoUri, userImage);
             }
@@ -202,34 +189,22 @@ public class RegistrationFragment extends BaseFragment {
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
     public void buttonAction(Button button){
         if (button.getId() == R.id.regCancelBtn){
-            getActivity().onBackPressed();
+            getActivity().getSupportFragmentManager().popBackStack();
             return;
         }
-        if (!TextUtils.isEmpty(userName.getText().toString()) && !TextUtils.isEmpty(userEmail.getText().toString())){
-            RegistrationFragment.super.replaceFragments(ChatListFragment.newInstance(), false);
-            /*onTaskStarted();
+        if (fieldValidation(userName) && fieldValidation(userEmail)){
+            isTaskRunning = true;
+            super.onTaskStarted(getActivity(), "Registration", "Please wait a moment!",
+                    true, false, cancelDialogListener, "Cancel", null, null);
             FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
-                    .addOnFailureListener(failureListener);*/
+                    .addOnFailureListener(failureListener);
         }
-    }
-
-    public void onTaskStarted() {
-        isTaskRunning = true;
-        showProgressDialog(getActivity(), "Registration", "Please wait a moment!",
-                true, false, cancelDialogListener, "Cancel", null, null);
-    }
-
-    public void onTaskFinished() {
-        if (RegistrationFragment.super.progressDialog != null) {
-            RegistrationFragment.super.progressDialog.dismiss();
-        }
-        isTaskRunning = false;
     }
 
     @Override
     public void onDetach() {
-        hideProgressDialog();
+        onTaskFinished();
         super.onDetach();
     }
 }
