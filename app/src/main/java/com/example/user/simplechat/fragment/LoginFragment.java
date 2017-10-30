@@ -93,7 +93,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
 
     private void showChatListFragment(FirebaseUser user) {
         if (user != null){
-            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(user.getUid()), super.CHAT_LIST_FRAG);
+            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), super.CHAT_LIST_FRAG);
             return;
         }
     }

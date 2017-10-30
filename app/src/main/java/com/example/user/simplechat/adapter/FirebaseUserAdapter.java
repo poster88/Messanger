@@ -40,10 +40,8 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     }
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
-        @BindView(R.id.itemUserImage)
-        ImageView userImage;
-        @BindView(R.id.itemUserName)
-        TextView userName;
+        @BindView(R.id.itemUserImage) ImageView userImage;
+        @BindView(R.id.itemUserName) TextView userName;
 
         UserViewHolder(View itemView) {
             super(itemView);
