@@ -18,7 +18,7 @@ public class FragmentTitle extends Fragment {
     public static final String CHAT_USER_INFO = "CHAT_USER_INFO";
     public static final String PHOTO_URI = "photo_uri";
 
-    public static int REQUEST_READ_PERMISSION = 9003;
-    public static int PHOTO_REQUEST = 9002;
-    public static int RESULT_OK = -1;
+    public static final int REQUEST_READ_PERMISSION = 9003;
+    public static final int PHOTO_REQUEST = 9002;
+    public static final int RESULT_OK = -1;
 }

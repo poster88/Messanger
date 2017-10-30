@@ -7,9 +7,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.user.simplechat.R;
-import com.google.firebase.auth.FirebaseAuth;
-
-import butterknife.OnClick;
 
 
 /**
@@ -32,20 +29,19 @@ public class ChatListFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null && getArguments().containsKey(USER_ID)){
             userID = getArguments().getString(USER_ID);
+            loadUserList();
         }
+    }
+
+    private void loadUserList() {
+        //todo: firebaseListAdapter
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.chatlist_fragment, container, false);
+        View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
         return view;
-    }
-
-    @OnClick(R.id.logOutBtn)
-    public void logOutAction(){
-        FirebaseAuth.getInstance().signOut();
-        super.replaceFragments(LoginFragment.newInstance(), null);
     }
 }
