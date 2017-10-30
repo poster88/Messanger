@@ -7,6 +7,8 @@ import android.support.v4.app.Fragment;
  */
 
 public class FragmentTitle extends Fragment {
+    public static final String REF_USERS = "https://messager-c419d.firebaseio.com/UserInfo/";
+
     public static final String LOGIN_FRAG = "LoginFragment";
     public static final String REGISTRATION_FRAG = "RegistrationFragment";
     public static final String CHAT_LIST_FRAG = "ChatListFragment";
