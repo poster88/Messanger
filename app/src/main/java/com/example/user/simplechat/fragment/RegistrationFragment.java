@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -48,6 +49,7 @@ public class RegistrationFragment extends BaseFragment {
 
     private Uri photoUri;
     private boolean isTaskRunning;
+    private Bitmap image;
 
     public static RegistrationFragment newInstance(){
         return new RegistrationFragment();
@@ -98,6 +100,7 @@ public class RegistrationFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
             isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
+            userImage.setImageBitmap((Bitmap)savedInstanceState.getParcelable(Const.USER_IMAGE_KEY));
         }
         if (isTaskRunning){
             setRegistrationTask();
@@ -143,7 +146,9 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean("isTaskRunning", isTaskRunning);
+        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
+        userImage.buildDrawingCache();
+        outState.putParcelable(Const.USER_IMAGE_KEY, userImage.getDrawingCache());
     }
 
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
