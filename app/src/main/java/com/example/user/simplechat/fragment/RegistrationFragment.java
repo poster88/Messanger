@@ -1,6 +1,7 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -114,7 +116,14 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        Log.d(Const.TAG, "RegistrationFragment : onCreate ");
+        //setRetainInstance(true);
+        if (savedInstanceState == null){
+            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is null***");
+        }else {
+            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is't null***");
+        }
+
     }
 
     @Nullable
@@ -122,6 +131,10 @@ public class RegistrationFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
+        Log.d(Const.TAG, "RegistrationFragment : onCreateView ");
+        if (savedInstanceState != null){
+            isTaskRunning = savedInstanceState.getBoolean("isTaskRunning");
+        }
         return view;
     }
 
@@ -136,6 +149,7 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(Const.TAG, "RegistrationFragment : onActivityCreated ");
         if (isTaskRunning){
             setRegistrationTask();
         }
@@ -186,9 +200,9 @@ public class RegistrationFragment extends BaseFragment {
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
             isTaskRunning = true;
             setRegistrationTask();
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
+            /*FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
-                    .addOnFailureListener(failureListener);
+                    .addOnFailureListener(failureListener);*/
         }
     }
 
@@ -201,5 +215,54 @@ public class RegistrationFragment extends BaseFragment {
     public void onDetach() {
         onTaskFinished();
         super.onDetach();
+        Log.d(Const.TAG, "RegistrationFragment : onDetach ");
     }
+
+
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(Const.TAG, "RegistrationFragment : onAttach ");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Const.TAG, "RegistrationFragment : onStart ");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Const.TAG, "RegistrationFragment : onResume ");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(Const.TAG, "RegistrationFragment : onStop ");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(Const.TAG, "RegistrationFragment : onDestroyView ");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(Const.TAG, "RegistrationFragment : onDestroy ");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(Const.TAG, "RegistrationFragment : onSaveInstanceState ");
+        outState.putBoolean("isTaskRunning", isTaskRunning);
+    }
+
+
 }
