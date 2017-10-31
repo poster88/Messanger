@@ -1,7 +1,6 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -11,7 +10,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -79,62 +77,11 @@ public class RegistrationFragment extends BaseFragment {
         }
     };
 
-    private void saveUserInRealTimeDB(User user, String downloadUrl){
-        user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
-        user.setUserName(userName.getText().toString());
-        user.setUserEmail(userEmail.getText().toString());
-        user.setImageUrl(downloadUrl);
-        Map<String, Object> userInfoMap = new HashMap<>();
-        userInfoMap.put(user.getUserID(), user);
-        FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
-
-        onTaskFinished();
-        isTaskRunning = false;
-        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
-    }
-
-    private void updateStoragePhoto(Uri photoUri) {
-        if (photoUri != null){
-            FirebaseStorage fs = FirebaseStorage.getInstance();
-            StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
-
-            userImage.setDrawingCacheEnabled(true);
-            userImage.buildDrawingCache();
-            Bitmap bitmap = userImage.getDrawingCache();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-
-            UploadTask uTask = sr.putBytes(data);
-            uTask.addOnFailureListener(failureListener);
-            uTask.addOnSuccessListener(addPhotoSuccessListener);
-            return;
-        }
-        saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
-    }
-
-    @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        Log.d(Const.TAG, "RegistrationFragment : onCreate ");
-        //setRetainInstance(true);
-        if (savedInstanceState == null){
-            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is null***");
-        }else {
-            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is't null***");
-        }
-
-    }
-
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
-        Log.d(Const.TAG, "RegistrationFragment : onCreateView ");
-        if (savedInstanceState != null){
-            isTaskRunning = savedInstanceState.getBoolean("isTaskRunning");
-        }
         return view;
     }
 
@@ -149,7 +96,9 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        Log.d(Const.TAG, "RegistrationFragment : onActivityCreated ");
+        if (savedInstanceState != null){
+            isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
+        }
         if (isTaskRunning){
             setRegistrationTask();
         }
@@ -191,6 +140,12 @@ public class RegistrationFragment extends BaseFragment {
         }
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean("isTaskRunning", isTaskRunning);
+    }
+
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
     public void buttonAction(Button button){
         if (button.getId() == R.id.regCancelBtn){
@@ -200,9 +155,9 @@ public class RegistrationFragment extends BaseFragment {
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
             isTaskRunning = true;
             setRegistrationTask();
-            /*FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
+            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
-                    .addOnFailureListener(failureListener);*/
+                    .addOnFailureListener(failureListener);
         }
     }
 
@@ -211,58 +166,37 @@ public class RegistrationFragment extends BaseFragment {
                 true, false, null, null, null, null);
     }
 
-    @Override
-    public void onDetach() {
+    private void saveUserInRealTimeDB(User user, String downloadUrl){
+        user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        user.setUserName(userName.getText().toString());
+        user.setUserEmail(userEmail.getText().toString());
+        user.setImageUrl(downloadUrl);
+        Map<String, Object> userInfoMap = new HashMap<>();
+        userInfoMap.put(user.getUserID(), user);
+        FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
+
         onTaskFinished();
-        super.onDetach();
-        Log.d(Const.TAG, "RegistrationFragment : onDetach ");
+        isTaskRunning = false;
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
     }
 
+    private void updateStoragePhoto(Uri photoUri) {
+        if (photoUri != null){
+            FirebaseStorage fs = FirebaseStorage.getInstance();
+            StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
 
+            userImage.setDrawingCacheEnabled(true);
+            userImage.buildDrawingCache();
+            Bitmap bitmap = userImage.getDrawingCache();
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] data = baos.toByteArray();
 
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Log.d(Const.TAG, "RegistrationFragment : onAttach ");
+            UploadTask uTask = sr.putBytes(data);
+            uTask.addOnFailureListener(failureListener);
+            uTask.addOnSuccessListener(addPhotoSuccessListener);
+            return;
+        }
+        saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
     }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Log.d(Const.TAG, "RegistrationFragment : onStart ");
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(Const.TAG, "RegistrationFragment : onResume ");
-    }
-
-    @Override
-    public void onStop() {
-        super.onStop();
-        Log.d(Const.TAG, "RegistrationFragment : onStop ");
-    }
-
-    @Override
-    public void onDestroyView() {
-        super.onDestroyView();
-        Log.d(Const.TAG, "RegistrationFragment : onDestroyView ");
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.d(Const.TAG, "RegistrationFragment : onDestroy ");
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        Log.d(Const.TAG, "RegistrationFragment : onSaveInstanceState ");
-        outState.putBoolean("isTaskRunning", isTaskRunning);
-    }
-
-
 }
