@@ -9,11 +9,14 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.user.simplechat.R;
+<<<<<<< HEAD
 import com.example.user.simplechat.adapter.FirebaseUserAdapter;
 import com.example.user.simplechat.model.User;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+=======
+>>>>>>> create new branch
 
 import butterknife.BindView;
 
@@ -37,19 +40,29 @@ public class ChatListFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+<<<<<<< HEAD
         setRetainInstance(true);
         if (savedInstanceState == null){
             ref = database.getReferenceFromUrl(REF_USERS);
             options = new FirebaseRecyclerOptions.Builder<User>().setQuery(ref, User.class).build();
             usersListAdapter = new FirebaseUserAdapter(options, R.layout.user_list_item);
             usersListAdapter.startListening();
+=======
+        if (getArguments() != null && getArguments().containsKey(USER_ID)){
+            userID = getArguments().getString(USER_ID);
+            loadUserList();
+>>>>>>> create new branch
         }
+    }
+
+    private void loadUserList() {
+        //todo: firebaseListAdapter
     }
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.chatlist_fragment, container, false);
+        View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
         layoutManager = new LinearLayoutManager(getActivity());
         usersRecView.setLayoutManager(layoutManager);
