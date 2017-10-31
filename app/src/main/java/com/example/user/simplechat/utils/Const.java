@@ -1,12 +1,11 @@
-package com.example.user.simplechat.fragment;
-
-import android.support.v4.app.Fragment;
+package com.example.user.simplechat.utils;
 
 /**
- * Created by POSTER on 28.10.2017.
+ * Created by User on 031 31.10.17.
  */
 
-public class FragmentTitle extends Fragment {
+public final class Const {
+    public static final String REF_USERS = "https://messager-c419d.firebaseio.com/UserInfo/";
     public static final String LOGIN_FRAG = "LoginFragment";
     public static final String REGISTRATION_FRAG = "RegistrationFragment";
     public static final String CHAT_LIST_FRAG = "ChatListFragment";
@@ -17,7 +16,10 @@ public class FragmentTitle extends Fragment {
     public static final String TAG = "LOG_TAG";
     public static final String CHAT_USER_INFO = "CHAT_USER_INFO";
     public static final String PHOTO_URI = "photo_uri";
+<<<<<<< HEAD:app/src/main/java/com/example/user/simplechat/fragment/FragmentTitle.java
 
+=======
+>>>>>>> e34ded5d96e4780ef97903b9653a0aa2cddf9860:app/src/main/java/com/example/user/simplechat/utils/Const.java
     public static final int REQUEST_READ_PERMISSION = 9003;
     public static final int PHOTO_REQUEST = 9002;
     public static final int RESULT_OK = -1;
