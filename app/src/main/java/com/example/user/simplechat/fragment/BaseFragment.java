@@ -24,7 +24,7 @@ import butterknife.Unbinder;
  * Created by User on 011 11.10.17.
  */
 
-public class BaseFragment extends FragmentTitle {
+public class BaseFragment extends Fragment {
     private Unbinder unbinder;
     protected ProgressDialog progressDialog;
 

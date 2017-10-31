@@ -1,6 +1,7 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -10,6 +11,7 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import android.widget.Toast;
 
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.User;
+import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,17 +86,17 @@ public class RegistrationFragment extends BaseFragment {
         user.setImageUrl(downloadUrl);
         Map<String, Object> userInfoMap = new HashMap<>();
         userInfoMap.put(user.getUserID(), user);
-        FirebaseDatabase.getInstance().getReference(USER_INFO).updateChildren(user.toMap());
+        FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
 
         onTaskFinished();
         isTaskRunning = false;
-        super.replaceFragments(ChatListFragment.newInstance(), CHAT_LIST_FRAG);
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
         if (photoUri != null){
             FirebaseStorage fs = FirebaseStorage.getInstance();
-            StorageReference sr = fs.getReference(USERS_IMAGES).child(photoUri.getLastPathSegment());
+            StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
 
             userImage.setDrawingCacheEnabled(true);
             userImage.buildDrawingCache();
@@ -107,13 +110,20 @@ public class RegistrationFragment extends BaseFragment {
             uTask.addOnSuccessListener(addPhotoSuccessListener);
             return;
         }
-        saveUserInRealTimeDB(new User(), PHOTO_DEFAULT);
+        saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
     }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setRetainInstance(true);
+        Log.d(Const.TAG, "RegistrationFragment : onCreate ");
+        //setRetainInstance(true);
+        if (savedInstanceState == null){
+            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is null***");
+        }else {
+            Log.d(Const.TAG, "*** RegistrationFragment : savedInstanceState is't null***");
+        }
+
     }
 
     @Nullable
@@ -121,6 +131,10 @@ public class RegistrationFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.registration_fragment, container, false);
         bindFragment(this, view);
+        Log.d(Const.TAG, "RegistrationFragment : onCreateView ");
+        if (savedInstanceState != null){
+            isTaskRunning = savedInstanceState.getBoolean("isTaskRunning");
+        }
         return view;
     }
 
@@ -135,6 +149,7 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
+        Log.d(Const.TAG, "RegistrationFragment : onActivityCreated ");
         if (isTaskRunning){
             setRegistrationTask();
         }
@@ -144,7 +159,7 @@ public class RegistrationFragment extends BaseFragment {
     public void setImageAction(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_PERMISSION);
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Const.REQUEST_READ_PERMISSION);
                 return;
             }
         }
@@ -153,7 +168,7 @@ public class RegistrationFragment extends BaseFragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_PERMISSION){
+        if (requestCode == Const.REQUEST_READ_PERMISSION){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 openFilePicker();
             }
@@ -163,13 +178,13 @@ public class RegistrationFragment extends BaseFragment {
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, PHOTO_REQUEST);
+        startActivityForResult(intent, Const.PHOTO_REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PHOTO_REQUEST){
-            if (resultCode == RESULT_OK){
+        if (requestCode == Const.PHOTO_REQUEST){
+            if (resultCode == Const.RESULT_OK){
                 photoUri = data.getData();
                 super.setRoundImageToView(photoUri, userImage);
             }
@@ -185,9 +200,9 @@ public class RegistrationFragment extends BaseFragment {
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
             isTaskRunning = true;
             setRegistrationTask();
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
+            /*FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
-                    .addOnFailureListener(failureListener);
+                    .addOnFailureListener(failureListener);*/
         }
     }
 
@@ -200,5 +215,54 @@ public class RegistrationFragment extends BaseFragment {
     public void onDetach() {
         onTaskFinished();
         super.onDetach();
+        Log.d(Const.TAG, "RegistrationFragment : onDetach ");
     }
+
+
+
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        Log.d(Const.TAG, "RegistrationFragment : onAttach ");
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Log.d(Const.TAG, "RegistrationFragment : onStart ");
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        Log.d(Const.TAG, "RegistrationFragment : onResume ");
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        Log.d(Const.TAG, "RegistrationFragment : onStop ");
+    }
+
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+        Log.d(Const.TAG, "RegistrationFragment : onDestroyView ");
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        Log.d(Const.TAG, "RegistrationFragment : onDestroy ");
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(Const.TAG, "RegistrationFragment : onSaveInstanceState ");
+        outState.putBoolean("isTaskRunning", isTaskRunning);
+    }
+
+
 }
