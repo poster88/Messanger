@@ -11,6 +11,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -53,7 +54,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
     @OnClick({R.id.loginBtn, R.id.registrationBtn})
     public void loginAction(Button button){
         if (button.getId() == R.id.registrationBtn){
-            super.replaceFragments(RegistrationFragment.newInstance(), super.REGISTRATION_FRAG);
+            super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_FRAG);
             return;
         }
         if(fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
@@ -93,7 +94,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
 
     private void showChatListFragment(FirebaseUser user) {
         if (user != null){
-            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), super.CHAT_LIST_FRAG);
+            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
             return;
         }
     }

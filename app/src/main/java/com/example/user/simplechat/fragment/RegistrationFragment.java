@@ -20,6 +20,7 @@ import android.widget.Toast;
 
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.User;
+import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,17 +84,17 @@ public class RegistrationFragment extends BaseFragment {
         user.setImageUrl(downloadUrl);
         Map<String, Object> userInfoMap = new HashMap<>();
         userInfoMap.put(user.getUserID(), user);
-        FirebaseDatabase.getInstance().getReference(USER_INFO).updateChildren(user.toMap());
+        FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
 
         onTaskFinished();
         isTaskRunning = false;
-        super.replaceFragments(ChatListFragment.newInstance(), CHAT_LIST_FRAG);
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
         if (photoUri != null){
             FirebaseStorage fs = FirebaseStorage.getInstance();
-            StorageReference sr = fs.getReference(USERS_IMAGES).child(photoUri.getLastPathSegment());
+            StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
 
             userImage.setDrawingCacheEnabled(true);
             userImage.buildDrawingCache();
@@ -107,7 +108,7 @@ public class RegistrationFragment extends BaseFragment {
             uTask.addOnSuccessListener(addPhotoSuccessListener);
             return;
         }
-        saveUserInRealTimeDB(new User(), PHOTO_DEFAULT);
+        saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
     }
 
     @Override
@@ -144,7 +145,7 @@ public class RegistrationFragment extends BaseFragment {
     public void setImageAction(){
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             if (ContextCompat.checkSelfPermission(getContext(), Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
-                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, REQUEST_READ_PERMISSION);
+                requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, Const.REQUEST_READ_PERMISSION);
                 return;
             }
         }
@@ -153,7 +154,7 @@ public class RegistrationFragment extends BaseFragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        if (requestCode == REQUEST_READ_PERMISSION){
+        if (requestCode == Const.REQUEST_READ_PERMISSION){
             if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
                 openFilePicker();
             }
@@ -163,13 +164,13 @@ public class RegistrationFragment extends BaseFragment {
     private void openFilePicker() {
         Intent intent = new Intent(Intent.ACTION_PICK);
         intent.setType("image/*");
-        startActivityForResult(intent, PHOTO_REQUEST);
+        startActivityForResult(intent, Const.PHOTO_REQUEST);
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == PHOTO_REQUEST){
-            if (resultCode == RESULT_OK){
+        if (requestCode == Const.PHOTO_REQUEST){
+            if (resultCode == Const.RESULT_OK){
                 photoUri = data.getData();
                 super.setRoundImageToView(photoUri, userImage);
             }

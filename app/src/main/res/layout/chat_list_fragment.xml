@@ -4,14 +4,11 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-<<<<<<< HEAD:app/src/main/res/layout/chatlist_fragment.xml
+
     <android.support.v7.widget.RecyclerView
         android:id="@+id/userRecycleView"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
     </android.support.v7.widget.RecyclerView>
-=======
-
->>>>>>> create new branch:app/src/main/res/layout/chat_list_fragment.xml
 </LinearLayout>
