@@ -94,6 +94,13 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
+        outState.putParcelable(Const.USER_IMAGE_KEY, photoUri);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
@@ -144,13 +151,6 @@ public class RegistrationFragment extends BaseFragment {
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
-        outState.putParcelable(Const.USER_IMAGE_KEY, photoUri);
-    }
-
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
     public void buttonAction(Button button){
         if (button.getId() == R.id.regCancelBtn){
@@ -182,7 +182,8 @@ public class RegistrationFragment extends BaseFragment {
 
         onTaskFinished();
         isTaskRunning = false;
-        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
+        super.removeFragmentFromBackStack();
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }
 
     private void updateStoragePhoto(Uri photoUri) {

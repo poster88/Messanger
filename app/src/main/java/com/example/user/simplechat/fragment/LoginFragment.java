@@ -54,7 +54,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
     @OnClick({R.id.loginBtn, R.id.registrationBtn})
     public void loginAction(Button button){
         if (button.getId() == R.id.registrationBtn){
-            super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_FRAG);
+            super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
             return;
         }
         if(fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
@@ -101,7 +101,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
 
     private void showChatListFragment(FirebaseUser user) {
         if (user != null){
-            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
+            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
         }
     }
 }

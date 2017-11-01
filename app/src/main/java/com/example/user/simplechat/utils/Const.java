@@ -7,8 +7,8 @@ package com.example.user.simplechat.utils;
 public final class Const {
     public static final String REF_USERS = "https://messager-c419d.firebaseio.com/UserInfo/";
     public static final String LOGIN_FRAG = "LoginFragment";
-    public static final String REGISTRATION_FRAG = "RegistrationFragment";
-    public static final String CHAT_LIST_FRAG = "ChatListFragment";
+    public static final String REGISTRATION_TAG = "RegistrationFragment";
+    public static final String CHAT_LIST_TAG = "ChatListFragment";
     public static final String USER_ID = "userID";
     public static final String USERS_IMAGES = "users_images";
     public static final String USER_INFO = "UserInfo";
