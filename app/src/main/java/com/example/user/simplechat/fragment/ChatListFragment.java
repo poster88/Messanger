@@ -13,7 +13,6 @@ import com.example.user.simplechat.adapter.FirebaseUserAdapter;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
 import butterknife.BindView;
@@ -36,7 +35,7 @@ public class ChatListFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             setRetainInstance(true);
-            setUpAdapter();
+            usersListAdapter = new FirebaseUserAdapter(setUpAdapter());
             usersListAdapter.startListening();
         }
     }
@@ -56,12 +55,11 @@ public class ChatListFragment extends BaseFragment {
         usersListAdapter.stopListening();
     }
 
-    private void setUpAdapter() {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS);
-        FirebaseRecyclerOptions<User> options = new FirebaseRecyclerOptions.Builder<User>()
-                .setQuery(ref, User.class)
+    private FirebaseRecyclerOptions<User> setUpAdapter() {
+        return new FirebaseRecyclerOptions
+                .Builder<User>()
+                .setQuery(FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS), User.class)
                 .build();
-        usersListAdapter = new FirebaseUserAdapter(options, R.layout.user_list_item);
     }
 
     private void setRecycleView() {

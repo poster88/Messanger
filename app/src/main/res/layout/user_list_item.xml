@@ -9,6 +9,15 @@
         android:layout_width="60dp"
         android:layout_height="60dp" />
 
+    <ProgressBar
+        android:id="@+id/progressBarItemList"
+        android:visibility="gone"
+        style="?attr/progressBarStyle"
+        android:layout_marginTop="16dp"
+        android:layout_marginLeft="16sp"
+        android:layout_width="30dp"
+        android:layout_height="30dp" />
+
     <TextView
         android:id="@+id/itemUserName"
         android:layout_width="wrap_content"

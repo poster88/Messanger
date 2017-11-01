@@ -33,7 +33,7 @@ public class BaseFragment extends Fragment {
         unbinder = ButterKnife.bind(target, view);
     }
 
-    protected void setRoundImageToView(Uri uri, ImageView view) {
+    public void setRoundImageToView(Uri uri, ImageView view) {
         Glide.with(this)
                 .load(uri)
                 .crossFade()

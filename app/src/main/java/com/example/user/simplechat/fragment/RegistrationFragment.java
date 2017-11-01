@@ -154,7 +154,7 @@ public class RegistrationFragment extends BaseFragment {
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
     public void buttonAction(Button button){
         if (button.getId() == R.id.regCancelBtn){
-            getActivity().getSupportFragmentManager().popBackStack();
+            super.removeFragmentFromBackStack();
             return;
         }
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
