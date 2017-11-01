@@ -31,12 +31,14 @@ public class MainActivity extends AppCompatActivity {
         if (fm.getBackStackEntryCount() > 0){
             if ((fm.findFragmentById(R.id.container)) instanceof ChatListFragment){
                 FirebaseAuth.getInstance().signOut();
-                fm.popBackStack(null, FragmentManager.POP_BACK_STACK_INCLUSIVE);
-                return;
             }
             fm.popBackStack();
             return;
         }
         super.onBackPressed();
+    }
+
+    public FragmentManager getFm() {
+        return fm;
     }
 }

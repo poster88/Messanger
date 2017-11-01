@@ -14,6 +14,7 @@ import android.widget.ImageView;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.utils.CircleTransform;
 
 import butterknife.ButterKnife;
@@ -32,7 +33,7 @@ public class BaseFragment extends Fragment {
         unbinder = ButterKnife.bind(target, view);
     }
 
-    protected void setRoundImageToView(Uri uri, ImageView view) {
+    public void setRoundImageToView(Uri uri, ImageView view) {
         Glide.with(this)
                 .load(uri)
                 .crossFade()
@@ -46,6 +47,10 @@ public class BaseFragment extends Fragment {
         ft.replace(R.id.container, fragment);
         ft.addToBackStack(tag);
         ft.commit();
+    }
+
+    protected void removeFragmentFromBackStack(){
+        ((MainActivity) getActivity()).getFm().popBackStack();
     }
 
     public void onTaskStarted(

@@ -4,7 +4,6 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -49,7 +48,6 @@ public class RegistrationFragment extends BaseFragment {
 
     private Uri photoUri;
     private boolean isTaskRunning;
-    private Bitmap image;
 
     public static RegistrationFragment newInstance(){
         return new RegistrationFragment();
@@ -96,11 +94,21 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
+        outState.putParcelable(Const.USER_IMAGE_KEY, photoUri);
+    }
+
+    @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
             isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
-            userImage.setImageBitmap((Bitmap)savedInstanceState.getParcelable(Const.USER_IMAGE_KEY));
+            photoUri = savedInstanceState.getParcelable(Const.USER_IMAGE_KEY);
+            if (photoUri != null){
+                super.setRoundImageToView(photoUri, userImage);
+            }
         }
         if (isTaskRunning){
             setRegistrationTask();
@@ -143,18 +151,10 @@ public class RegistrationFragment extends BaseFragment {
         }
     }
 
-    @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
-        userImage.buildDrawingCache();
-        outState.putParcelable(Const.USER_IMAGE_KEY, userImage.getDrawingCache());
-    }
-
     @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
     public void buttonAction(Button button){
         if (button.getId() == R.id.regCancelBtn){
-            getActivity().getSupportFragmentManager().popBackStack();
+            super.removeFragmentFromBackStack();
             return;
         }
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
@@ -182,7 +182,8 @@ public class RegistrationFragment extends BaseFragment {
 
         onTaskFinished();
         isTaskRunning = false;
-        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_FRAG);
+        super.removeFragmentFromBackStack();
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }
 
     private void updateStoragePhoto(Uri photoUri) {
