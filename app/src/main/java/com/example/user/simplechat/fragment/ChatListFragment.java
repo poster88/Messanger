@@ -25,11 +25,7 @@ import butterknife.BindView;
 public class ChatListFragment extends BaseFragment {
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
 
-    private DatabaseReference ref;
-    private RecyclerView.LayoutManager layoutManager;
     private FirebaseUserAdapter usersListAdapter;
-    private FirebaseRecyclerOptions<User> options;
-    private FirebaseDatabase database = FirebaseDatabase.getInstance();
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -39,9 +35,8 @@ public class ChatListFragment extends BaseFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
-            ref = database.getReferenceFromUrl(Const.REF_USERS);
-            options = new FirebaseRecyclerOptions.Builder<User>().setQuery(ref, User.class).build();
-            usersListAdapter = new FirebaseUserAdapter(options, R.layout.user_list_item);
+            setRetainInstance(true);
+            setUpAdapter();
             usersListAdapter.startListening();
         }
     }
@@ -51,9 +46,26 @@ public class ChatListFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
-        layoutManager = new LinearLayoutManager(getActivity());
-        usersRecView.setLayoutManager(layoutManager);
-        usersRecView.setAdapter(usersListAdapter);
+        setRecycleView();
         return view;
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        usersListAdapter.stopListening();
+    }
+
+    private void setUpAdapter() {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS);
+        FirebaseRecyclerOptions<User> options = new FirebaseRecyclerOptions.Builder<User>()
+                .setQuery(ref, User.class)
+                .build();
+        usersListAdapter = new FirebaseUserAdapter(options, R.layout.user_list_item);
+    }
+
+    private void setRecycleView() {
+        usersRecView.setLayoutManager(new LinearLayoutManager(getActivity()));
+        usersRecView.setAdapter(usersListAdapter);
     }
 }
