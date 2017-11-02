@@ -13,6 +13,7 @@ import com.example.user.simplechat.adapter.FirebaseUserAdapter;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
@@ -22,7 +23,7 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment {
+public class ChatListFragment extends BaseFragment implements FirebaseUserAdapter.MyClickListener{
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
 
     private FirebaseUserAdapter usersListAdapter;
@@ -31,19 +32,13 @@ public class ChatListFragment extends BaseFragment {
         return new ChatListFragment();
     }
 
-    private FirebaseUserAdapter.MyClickListener myClickListener = new FirebaseUserAdapter.MyClickListener() {
-        @Override
-        public void onItemClick(String userID) {
-            System.out.println("userID is " + userID + " native");
-        }
-    };
-
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             setRetainInstance(true);
-            usersListAdapter = new FirebaseUserAdapter(setUpAdapter(), myClickListener);
+            usersListAdapter = new FirebaseUserAdapter(setFirebaseRecyclerOptions(), FirebaseAuth.getInstance().getUid());
+            usersListAdapter.setMyOnClickListener(this);
             usersListAdapter.startListening();
         }
     }
@@ -63,7 +58,7 @@ public class ChatListFragment extends BaseFragment {
         usersListAdapter.stopListening();
     }
 
-    private FirebaseRecyclerOptions<User> setUpAdapter() {
+    private FirebaseRecyclerOptions<User> setFirebaseRecyclerOptions() {
         Query query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
         return new FirebaseRecyclerOptions.Builder<User>().setQuery(query, User.class).build();
     }
@@ -71,5 +66,10 @@ public class ChatListFragment extends BaseFragment {
     private void setRecycleView() {
         usersRecView.setLayoutManager(new LinearLayoutManager(getActivity()));
         usersRecView.setAdapter(usersListAdapter);
+    }
+
+    @Override
+    public void onItemClick(String userID) {
+        super.replaceFragments(ChatFragment.newInstance(userID), Const.CHAT_FRAG_TAG);
     }
 }

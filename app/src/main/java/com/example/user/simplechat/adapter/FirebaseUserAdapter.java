@@ -30,9 +30,14 @@ import butterknife.ButterKnife;
 
 public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseUserAdapter.UserViewHolder>{
     private MyClickListener myClickListener;
+    private String currentUserID;
 
-    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, MyClickListener myClickListener) {
+    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, String currentUserID) {
         super(options);
+        this.currentUserID = currentUserID;
+    }
+
+    public void setMyOnClickListener(MyClickListener myClickListener){
         this.myClickListener = myClickListener;
     }
 
@@ -44,18 +49,24 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
 
     @Override
     protected void onBindViewHolder(UserViewHolder holder, final int position, final User model) {
-        holder.userName.setText(model.getUserName());
+        if (!model.getUserID().equals(currentUserID)){
+            setUserImage(holder, model);
+            holder.userName.setText(model.getUserName());
+            holder.itemView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    myClickListener.onItemClick(model.getUserID());
+                }
+            });
+        }
+    }
+
+    private void setUserImage(UserViewHolder holder, User model) {
         if (model.getImageUrl() == null || model.getImageUrl().equals(Const.DEFAULT_IMAGE_KEY)){
             setImageDefault(holder.userImage, holder.progressBar);
-        }else {
-            setRoundImageToView(Uri.parse(model.getImageUrl()), holder.userImage, holder.progressBar);
+            return;
         }
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                myClickListener.onItemClick(model.getUserID());
-            }
-        });
+        setRoundImageToView(Uri.parse(model.getImageUrl()), holder.userImage, holder.progressBar);
     }
 
     private void setRoundImageToView(Uri uri, final ImageView view, final ProgressBar progressBar) {
