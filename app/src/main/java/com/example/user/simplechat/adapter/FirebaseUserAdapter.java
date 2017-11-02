@@ -28,10 +28,12 @@ import butterknife.ButterKnife;
  * Created by User on 030 30.10.17.
  */
 
-public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseUserAdapter.UserViewHolder> {
+public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseUserAdapter.UserViewHolder>{
+    private MyClickListener myClickListener;
 
-    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options) {
+    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, MyClickListener myClickListener) {
         super(options);
+        this.myClickListener = myClickListener;
     }
 
     @Override
@@ -41,13 +43,19 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     }
 
     @Override
-    protected void onBindViewHolder(UserViewHolder holder, int position, User model) {
+    protected void onBindViewHolder(UserViewHolder holder, final int position, final User model) {
         holder.userName.setText(model.getUserName());
         if (model.getImageUrl() == null || model.getImageUrl().equals(Const.DEFAULT_IMAGE_KEY)){
             setImageDefault(holder.userImage, holder.progressBar);
-            return;
+        }else {
+            setRoundImageToView(Uri.parse(model.getImageUrl()), holder.userImage, holder.progressBar);
         }
-        setRoundImageToView(Uri.parse(model.getImageUrl()), holder.userImage, holder.progressBar);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                myClickListener.onItemClick(model.getUserID());
+            }
+        });
     }
 
     private void setRoundImageToView(Uri uri, final ImageView view, final ProgressBar progressBar) {
@@ -79,6 +87,11 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
             progressBar.setVisibility(View.GONE);
         }
     }
+
+    public interface MyClickListener {
+        public void onItemClick(String userID);
+    }
+
 
     static class UserViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.itemUserImage) ImageView userImage;
