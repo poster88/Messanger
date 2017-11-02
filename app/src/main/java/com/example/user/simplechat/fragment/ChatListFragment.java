@@ -14,6 +14,7 @@ import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 import butterknife.BindView;
 
@@ -30,12 +31,19 @@ public class ChatListFragment extends BaseFragment {
         return new ChatListFragment();
     }
 
+    private FirebaseUserAdapter.MyClickListener myClickListener = new FirebaseUserAdapter.MyClickListener() {
+        @Override
+        public void onItemClick(String userID) {
+            System.out.println("userID is " + userID + " native");
+        }
+    };
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null) {
             setRetainInstance(true);
-            usersListAdapter = new FirebaseUserAdapter(setUpAdapter());
+            usersListAdapter = new FirebaseUserAdapter(setUpAdapter(), myClickListener);
             usersListAdapter.startListening();
         }
     }
@@ -56,10 +64,8 @@ public class ChatListFragment extends BaseFragment {
     }
 
     private FirebaseRecyclerOptions<User> setUpAdapter() {
-        return new FirebaseRecyclerOptions
-                .Builder<User>()
-                .setQuery(FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS), User.class)
-                .build();
+        Query query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
+        return new FirebaseRecyclerOptions.Builder<User>().setQuery(query, User.class).build();
     }
 
     private void setRecycleView() {
