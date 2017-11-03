@@ -26,4 +26,11 @@
         android:layout_marginLeft="6dp"
         android:textSize="22sp"
         android:text="test" />
+
+    <TextView
+        android:id="@+id/chatStatus"
+        android:layout_width="50dp"
+        android:layout_height="30dp"
+        android:text="no data"
+        android:layout_alignParentRight="true" />
 </RelativeLayout>

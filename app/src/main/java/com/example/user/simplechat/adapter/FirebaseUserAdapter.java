@@ -15,11 +15,19 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.CircleTransform;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -48,7 +56,24 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     }
 
     @Override
-    protected void onBindViewHolder(UserViewHolder holder, final int position, final User model) {
+    protected void onBindViewHolder(final UserViewHolder holder, final int position, final User model) {
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://messager-c419d.firebaseio.com/ChatIDTable");
+        ref.child(currentUserID).addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getKey().equals(model.getUserID())){
+                    System.out.println("found chat");
+                    holder.chatStatus.setText("continue chat");
+                    System.out.println("chatLick is: " + dataSnapshot.getValue());
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         if (!model.getUserID().equals(currentUserID)){
             setUserImage(holder, model);
             holder.userName.setText(model.getUserName());
@@ -108,6 +133,7 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
         @BindView(R.id.itemUserImage) ImageView userImage;
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
+        @BindView(R.id.chatStatus) TextView chatStatus;
 
         UserViewHolder(View itemView) {
             super(itemView);

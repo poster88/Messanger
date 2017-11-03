@@ -7,14 +7,12 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.listener.ValueListener;
+import com.example.user.simplechat.model.ChatTable;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
+
 
 /**
  * Created by POSTER on 02.11.2017.
@@ -39,17 +37,10 @@ public class ChatFragment extends BaseFragment{
         if (savedInstanceState == null) {
             receiverID = getArguments().getString(Const.RECEIVER_ID);
             database = FirebaseDatabase.getInstance();
+
             DatabaseReference ref = database.getReference(Const.CHAT_ID_TABLE).child(FirebaseAuth.getInstance().getUid());
-            ref.addListenerForSingleValueEvent(new ValueListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    if (dataSnapshot.exists()) {
-                        for (DataSnapshot data : dataSnapshot.getChildren()) {
-                            //add
-                        }
-                    }
-                }
-            });
+            ChatTable chatTable = new ChatTable(ref, FirebaseAuth.getInstance().getUid(), receiverID);
+            chatTable.updateChildren(chatTable.toMap());
         }
     }
 
