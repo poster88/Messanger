@@ -27,6 +27,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+
 import java.util.Map;
 
 import butterknife.BindView;
@@ -58,19 +59,35 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     @Override
     protected void onBindViewHolder(final UserViewHolder holder, final int position, final User model) {
         DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://messager-c419d.firebaseio.com/ChatIDTable");
-        ref.child(currentUserID).addListenerForSingleValueEvent(new ValueEventListener() {
+        /*ref.child(currentUserID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                if (dataSnapshot.getKey().equals(model.getUserID())){
-                    System.out.println("found chat");
-                    holder.chatStatus.setText("continue chat");
-                    System.out.println("chatLick is: " + dataSnapshot.getValue());
+                for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
+                    if (data.getKey().equals(model.getUserID())){
+                        holder.chatStatus.setText("continue chat");
+                    }
                 }
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
+            }
+        });*/
+
+        ref.child(currentUserID).addListenerForSingleValueEvent(new ValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                super.onDataChange(dataSnapshot);
+                if (dataSnapshot.exists()){
+                    for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
+                        if (data.getKey().equals(model.getUserID())){
+                            holder.chatStatus.setText("continue chat");
+                        }else {
+                            holder.chatStatus.setText("-------- ");
+                        }
+                    }
+                }
             }
         });
 

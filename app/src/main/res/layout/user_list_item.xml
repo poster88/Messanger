@@ -33,4 +33,13 @@
         android:layout_height="30dp"
         android:text="no data"
         android:layout_alignParentRight="true" />
+
+    <ImageView
+        android:id="@+id/loginStatus"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:background="#ff0000"
+        android:layout_marginRight="6dp"
+        android:layout_toLeftOf="@id/chatStatus"
+        />
 </RelativeLayout>
