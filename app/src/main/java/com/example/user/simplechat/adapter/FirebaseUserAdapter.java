@@ -28,6 +28,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 
+import java.util.ArrayList;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -40,10 +41,12 @@ import butterknife.ButterKnife;
 public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseUserAdapter.UserViewHolder>{
     private MyClickListener myClickListener;
     private String currentUserID;
+    private ArrayList<String> chatsIDArray;
 
-    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, String currentUserID) {
+    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, String currentUserID, ArrayList<String> chatsIDArray) {
         super(options);
         this.currentUserID = currentUserID;
+        this.chatsIDArray = chatsIDArray;
     }
 
     public void setMyOnClickListener(MyClickListener myClickListener){
@@ -58,13 +61,14 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
 
     @Override
     protected void onBindViewHolder(final UserViewHolder holder, final int position, final User model) {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://messager-c419d.firebaseio.com/ChatIDTable");
+
         /*ref.child(currentUserID).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
                     if (data.getKey().equals(model.getUserID())){
                         holder.chatStatus.setText("continue chat");
+                        System.out.println("found chat with " + model.getUserID() + " pos : " + position);
                     }
                 }
             }
@@ -73,8 +77,9 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
             public void onCancelled(DatabaseError databaseError) {
 
             }
-        });*/
+        });
 
+        System.out.println(currentUserID);
         ref.child(currentUserID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -83,16 +88,31 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
                     for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
                         if (data.getKey().equals(model.getUserID())){
                             holder.chatStatus.setText("continue chat");
+                            System.out.println("found chat with " + model.getUserID());
                         }else {
                             holder.chatStatus.setText("-------- ");
                         }
                     }
                 }
             }
-        });
+        });*/
 
         if (!model.getUserID().equals(currentUserID)){
             setUserImage(holder, model);
+            for (int i = 0; i < chatsIDArray.size(); i++) {
+                if (model.getUserID().equals(chatsIDArray.get(i))){
+                    holder.chatStatus.setText("found" );
+                    break;
+                }else {
+                    holder.chatStatus.setText(model.getUserID());
+                }
+            }
+            /*if (model.getUserID().equals("4rJppdUIbSPqMqyBAcqV0ss0ZbM2") ||
+                    model.getUserID().equals("4ziS9ynb3cgY6QFtUa1BkzPV9tH3") || model.getUserID().equals("2uRXywew0Pb7zr8Zfu7m2Nej5G32")){
+                holder.chatStatus.setText("found" );
+            }else {
+                holder.chatStatus.setText(model.getUserID());
+            }*/
             holder.userName.setText(model.getUserName());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -143,6 +163,7 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
 
     public interface MyClickListener {
         public void onItemClick(String userID);
+        public void updateItem(int position);
     }
 
 
@@ -157,4 +178,6 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
             ButterKnife.bind(this, itemView);
         }
     }
+
+
 }
