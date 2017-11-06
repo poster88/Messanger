@@ -15,21 +15,14 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.CircleTransform;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
 
 import java.util.ArrayList;
-import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -60,66 +53,29 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     }
 
     @Override
-    protected void onBindViewHolder(final UserViewHolder holder, final int position, final User model) {
-
-        /*ref.child(currentUserID).addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
-                    if (data.getKey().equals(model.getUserID())){
-                        holder.chatStatus.setText("continue chat");
-                        System.out.println("found chat with " + model.getUserID() + " pos : " + position);
-                    }
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        System.out.println(currentUserID);
-        ref.child(currentUserID).addListenerForSingleValueEvent(new ValueListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                super.onDataChange(dataSnapshot);
-                if (dataSnapshot.exists()){
-                    for (Map.Entry<String, String> data: ((Map<String, String>) dataSnapshot.getValue()).entrySet()) {
-                        if (data.getKey().equals(model.getUserID())){
-                            holder.chatStatus.setText("continue chat");
-                            System.out.println("found chat with " + model.getUserID());
-                        }else {
-                            holder.chatStatus.setText("-------- ");
-                        }
-                    }
-                }
-            }
-        });*/
-
+    protected void onBindViewHolder(UserViewHolder holder, final int position, final User model) {
         if (!model.getUserID().equals(currentUserID)){
+            holder.itemView.setVisibility(View.VISIBLE);
             setUserImage(holder, model);
             for (int i = 0; i < chatsIDArray.size(); i++) {
                 if (model.getUserID().equals(chatsIDArray.get(i))){
-                    holder.chatStatus.setText("found" );
+                    holder.chatStatus.setText("found" + position);
                     break;
                 }else {
                     holder.chatStatus.setText(model.getUserID());
                 }
             }
-            /*if (model.getUserID().equals("4rJppdUIbSPqMqyBAcqV0ss0ZbM2") ||
-                    model.getUserID().equals("4ziS9ynb3cgY6QFtUa1BkzPV9tH3") || model.getUserID().equals("2uRXywew0Pb7zr8Zfu7m2Nej5G32")){
-                holder.chatStatus.setText("found" );
-            }else {
-                holder.chatStatus.setText(model.getUserID());
-            }*/
             holder.userName.setText(model.getUserName());
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-                    myClickListener.onItemClick(model.getUserID());
+                    //myClickListener.onItemClick(model.getUserID());
+                    //myClickListener.updateItem(position);
+                    //System.out.println(dataArray.get(position).getUserName());рщц
                 }
             });
+        }else {
+            holder.itemView.setVisibility(View.GONE);
         }
     }
 
@@ -179,5 +135,9 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
         }
     }
 
+    @Override
+    public User getItem(int position) {
 
+        return super.getItem(position);
+    }
 }
