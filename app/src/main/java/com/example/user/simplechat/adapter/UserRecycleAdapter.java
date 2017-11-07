@@ -1,5 +1,6 @@
 package com.example.user.simplechat.adapter;
 
+import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,9 +19,6 @@ import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.CircleTransform;
 import com.example.user.simplechat.utils.Const;
-import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
-
 
 import java.util.ArrayList;
 
@@ -28,22 +26,16 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 /**
- * Created by User on 030 30.10.17.
+ * Created by POSTER on 07.11.2017.
  */
 
-public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseUserAdapter.UserViewHolder>{
-    private MyClickListener myClickListener;
-    private String currentUserID;
-    private ArrayList<String> chatsIDArray;
+public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder>{
+    private ArrayList<User> usersListData;
+    private Context context;
 
-    public FirebaseUserAdapter(FirebaseRecyclerOptions<User> options, String currentUserID, ArrayList<String> chatsIDArray) {
-        super(options);
-        this.currentUserID = currentUserID;
-        this.chatsIDArray = chatsIDArray;
-    }
-
-    public void setMyOnClickListener(MyClickListener myClickListener){
-        this.myClickListener = myClickListener;
+    public UserRecycleAdapter(ArrayList<User> usersListData, Context context) {
+        this.usersListData = usersListData;
+        this.context = context;
     }
 
     @Override
@@ -53,29 +45,14 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
     }
 
     @Override
-    protected void onBindViewHolder(UserViewHolder holder, final int position, final User model) {
-        if (!model.getUserID().equals(currentUserID)){
-            holder.itemView.setVisibility(View.VISIBLE);
-            setUserImage(holder, model);
-            for (int i = 0; i < chatsIDArray.size(); i++) {
-                if (model.getUserID().equals(chatsIDArray.get(i))){
-                    holder.chatStatus.setText("found" + position);
-                    break;
-                }else {
-                    holder.chatStatus.setText(model.getUserID());
-                }
-            }
-            holder.userName.setText(model.getUserName());
-            holder.itemView.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    //myClickListener.onItemClick(model.getUserID());
-                    //myClickListener.updateItem(position);
-                    //System.out.println(dataArray.get(position).getUserName());рщц
-                }
-            });
-        }else {
-        }
+    public void onBindViewHolder(UserViewHolder holder, int position) {
+        setUserImage(holder, usersListData.get(position));
+        holder.userName.setText(usersListData.get(position).getUserName());
+    }
+
+    @Override
+    public int getItemCount() {
+        return usersListData.size();
     }
 
     private void setUserImage(UserViewHolder holder, User model) {
@@ -116,26 +93,16 @@ public class FirebaseUserAdapter extends FirebaseRecyclerAdapter<User, FirebaseU
         }
     }
 
-    public interface MyClickListener {
-        public void onItemClick(String userID);
-        public void updateItem(int position);
-    }
-
-
-    static class UserViewHolder extends RecyclerView.ViewHolder {
+    public static class UserViewHolder extends RecyclerView.ViewHolder{
         @BindView(R.id.itemUserImage) ImageView userImage;
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;
 
-        UserViewHolder(View itemView) {
+
+        public UserViewHolder(View itemView) {
             super(itemView);
             ButterKnife.bind(this, itemView);
         }
-    }
-
-    @Override
-    public User getItem(int position) {
-        return super.getItem(position);
     }
 }
