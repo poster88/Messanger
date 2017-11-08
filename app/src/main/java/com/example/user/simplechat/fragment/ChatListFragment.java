@@ -1,6 +1,7 @@
 package com.example.user.simplechat.fragment;
 
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -31,19 +32,24 @@ public class ChatListFragment extends BaseFragment {
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
     private String currentUserID;
     private ArrayList<User> usersListData;
+    private ArrayList<String> enabledChatUsersData;
     private RecyclerView.Adapter adapter;
+    private LinearLayoutManager layoutManager;
     private Query query;
+    private Query queryChatID;
+    private Parcelable state;
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
     }
 
-    private ChildValueListener myChildListener = new ChildValueListener() {
+    private ChildValueListener usersInfoListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)){
                 usersListData.add(dataSnapshot.getValue(User.class));
                 adapter.notifyItemInserted(usersListData.size());
+                System.out.println("inserted");
             }
         }
 
@@ -61,30 +67,38 @@ public class ChatListFragment extends BaseFragment {
         @Override
         public void onChildRemoved(DataSnapshot dataSnapshot) {
             super.onChildRemoved(dataSnapshot);
-            System.out.println(dataSnapshot.toString() + "onChildRemoved" );
+            int index = usersListData.indexOf(dataSnapshot.getValue(User.class));
+            usersListData.remove(index);
+            adapter.notifyItemRemoved(index);
+        }
+    };
+
+    private ChildValueListener chatIDTableListener = new ChildValueListener() {
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            enabledChatUsersData.add(dataSnapshot.getKey());
         }
 
         @Override
-        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-            super.onChildMoved(dataSnapshot, s);
-            System.out.println(dataSnapshot.toString() + "onChildMoved string : " + s);
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            enabledChatUsersData.remove(dataSnapshot.getKey());
         }
     };
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (savedInstanceState == null) {
-            setRetainInstance(true);
-            innitDataForWidget();
-        }
+        innitDataForQuery();
     }
 
-    private void innitDataForWidget() {
+    private void innitDataForQuery() {
         currentUserID = FirebaseAuth.getInstance().getUid();
         usersListData = new ArrayList<>();
-        adapter = new UserRecycleAdapter(usersListData);
+        enabledChatUsersData = new ArrayList<>();
+        layoutManager = new LinearLayoutManager(getContext());
+        adapter = new UserRecycleAdapter(usersListData, enabledChatUsersData);
         query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
+        queryChatID = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
 
     @Nullable
@@ -92,25 +106,49 @@ public class ChatListFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
-        usersRecView.setLayoutManager(new LinearLayoutManager(getContext()));
+        usersRecView.setLayoutManager(layoutManager);
         usersRecView.setAdapter(adapter);
         return view;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        state = layoutManager.onSaveInstanceState();
+        outState.putParcelable(Const.SCROLL_POSITION_KEY, state);
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null){
+            state = savedInstanceState.getParcelable(Const.SCROLL_POSITION_KEY);
+        }
+    }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (query != null){
-            query.addChildEventListener(myChildListener);
+        if (query != null && queryChatID != null){
+            query.addChildEventListener(usersInfoListener);
+            queryChatID.addChildEventListener(chatIDTableListener);
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (query != null){
-            query.removeEventListener(myChildListener);
+        if (query != null && queryChatID != null){
+            query.removeEventListener(usersInfoListener);
+            queryChatID.removeEventListener(chatIDTableListener);
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (state != null){
+            usersRecView.getLayoutManager().onRestoreInstanceState(state);
         }
     }
 

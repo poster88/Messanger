@@ -22,6 +22,8 @@ public final class Const {
     public static final String PHOTO_URI = "photo_uri";
     public static final String IS_TASK_RUNNING_KEY = "isTaskRunning";
     public static final String USER_IMAGE_KEY = "userImageKey";
+    public static final String SCROLL_POSITION_KEY = "userImageKey";
+
     public static final String DEFAULT_IMAGE_KEY = "default";
     public static final String QUERY_NAME_KEY = "userName";
     public static final int REQUEST_READ_PERMISSION = 9003;

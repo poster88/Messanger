@@ -1,6 +1,5 @@
 package com.example.user.simplechat.adapter;
 
-import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,9 +30,11 @@ import butterknife.ButterKnife;
 
 public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder>{
     private ArrayList<User> usersListData;
+    private ArrayList<String> enabledChatUsersData;
 
-    public UserRecycleAdapter(ArrayList<User> usersListData) {
+    public UserRecycleAdapter(ArrayList<User> usersListData, ArrayList<String> enabledChatUsersData) {
         this.usersListData = usersListData;
+        this.enabledChatUsersData = enabledChatUsersData;
     }
 
     @Override
@@ -46,6 +47,11 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     public void onBindViewHolder(UserViewHolder holder, int position) {
         setUserImage(holder, usersListData.get(position));
         holder.userName.setText(usersListData.get(position).getUserName());
+        String chatStatus = "no chat";
+        if (enabledChatUsersData.contains(usersListData.get(position).getUserID())){
+            chatStatus = "continue chat";
+        }
+        holder.chatStatus.setText(chatStatus);
     }
 
     @Override
