@@ -1,5 +1,8 @@
 package com.example.user.simplechat.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +10,7 @@ import java.util.Map;
  * Created by User on 005 05.10.17.
  */
 
-public class User {
+public class User implements Parcelable{
     private String userID;
     private String imageUrl;
     private String userName;
@@ -21,6 +24,13 @@ public class User {
         this.imageUrl = imageUrl;
         this.userName = userName;
         this.userEmail = userEmail;
+    }
+
+    public User(Parcel parcel) {
+        userID = parcel.readString();
+        imageUrl = parcel.readString();
+        userName = parcel.readString();
+        userEmail = parcel.readString();
     }
 
     public Map<String, Object> toMap(){
@@ -90,4 +100,30 @@ public class User {
     public String getUserEmail() {
         return userEmail;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(userID);
+        parcel.writeString(imageUrl);
+        parcel.writeString(userName);
+        parcel.writeString(userEmail);
+    }
+
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>(){
+
+        @Override
+        public User createFromParcel(Parcel parcel) {
+            return new User(parcel);
+        }
+
+        @Override
+        public User[] newArray(int i) {
+            return new User[i];
+        }
+    };
 }

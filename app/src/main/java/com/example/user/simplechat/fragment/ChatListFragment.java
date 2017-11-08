@@ -1,7 +1,6 @@
 package com.example.user.simplechat.fragment;
 
 import android.os.Bundle;
-import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -12,11 +11,12 @@ import android.view.ViewGroup;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
+import com.example.user.simplechat.model.ChatTable;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
-import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
@@ -28,16 +28,16 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment {
+public class ChatListFragment extends BaseFragment implements UserRecycleAdapter.MyClickListener{
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
+
     private String currentUserID;
     private ArrayList<User> usersListData;
     private ArrayList<String> enabledChatUsersData;
-    private RecyclerView.Adapter adapter;
+    private UserRecycleAdapter adapter;
     private LinearLayoutManager layoutManager;
+    private DatabaseReference chatTableRef;
     private Query query;
-    private Query queryChatID;
-    private Parcelable state;
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -46,10 +46,11 @@ public class ChatListFragment extends BaseFragment {
     private ChildValueListener usersInfoListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)){
-                usersListData.add(dataSnapshot.getValue(User.class));
-                adapter.notifyItemInserted(usersListData.size());
-                System.out.println("inserted");
+            if (!usersListData.contains(dataSnapshot.getValue(User.class))){
+                if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)){
+                    usersListData.add(dataSnapshot.getValue(User.class));
+                    adapter.notifyItemInserted(usersListData.size());
+                }
             }
         }
 
@@ -76,7 +77,15 @@ public class ChatListFragment extends BaseFragment {
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            enabledChatUsersData.add(dataSnapshot.getKey());
+            if (!enabledChatUsersData.contains(dataSnapshot.getKey())){
+                enabledChatUsersData.add(dataSnapshot.getKey());
+                for (int i = 0; i < usersListData.size(); i++) {
+                    if (usersListData.get(i).getUserID().equals(dataSnapshot.getKey())){
+                        adapter.notifyItemChanged(i);
+                        break;
+                    }
+                }
+            }
         }
 
         @Override
@@ -95,10 +104,9 @@ public class ChatListFragment extends BaseFragment {
         currentUserID = FirebaseAuth.getInstance().getUid();
         usersListData = new ArrayList<>();
         enabledChatUsersData = new ArrayList<>();
-        layoutManager = new LinearLayoutManager(getContext());
-        adapter = new UserRecycleAdapter(usersListData, enabledChatUsersData);
+        layoutManager = new LinearLayoutManager(getActivity());
         query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
-        queryChatID = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
+        chatTableRef = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
 
     @Nullable
@@ -106,65 +114,60 @@ public class ChatListFragment extends BaseFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
-        usersRecView.setLayoutManager(layoutManager);
-        usersRecView.setAdapter(adapter);
+        if (savedInstanceState == null){
+            innitAdapter();
+        }
         return view;
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        state = layoutManager.onSaveInstanceState();
-        outState.putParcelable(Const.SCROLL_POSITION_KEY, state);
+        outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
+        outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
+        outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            state = savedInstanceState.getParcelable(Const.SCROLL_POSITION_KEY);
+            usersListData = savedInstanceState.getParcelableArrayList(Const.USER_LIST_DATA_KEY);
+            enabledChatUsersData = savedInstanceState.getStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY);
+            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
+            innitAdapter();
         }
+    }
+
+    public void innitAdapter(){
+        adapter = new UserRecycleAdapter(usersListData, enabledChatUsersData);
+        adapter.setMyClickListener(ChatListFragment.this);
+        usersRecView.setLayoutManager(layoutManager);
+        usersRecView.setAdapter(adapter);
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        if (query != null && queryChatID != null){
+        if (query != null && chatTableRef != null){
             query.addChildEventListener(usersInfoListener);
-            queryChatID.addChildEventListener(chatIDTableListener);
+            chatTableRef.addChildEventListener(chatIDTableListener);
         }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        if (query != null && queryChatID != null){
+        if (query != null && chatTableRef != null){
             query.removeEventListener(usersInfoListener);
-            queryChatID.removeEventListener(chatIDTableListener);
+            chatTableRef.removeEventListener(chatIDTableListener);
         }
     }
 
     @Override
-    public void onResume() {
-        super.onResume();
-        if (state != null){
-            usersRecView.getLayoutManager().onRestoreInstanceState(state);
-        }
-    }
-
-    private FirebaseRecyclerOptions<User> setFirebaseRecyclerOptions() {
-        Query query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
-        return new FirebaseRecyclerOptions.Builder<User>().setQuery(query, User.class).build();
-    }
-
-    /*@Override
     public void onItemClick(String userID) {
-        //super.replaceFragments(ChatFragment.newInstance(userID), Const.CHAT_FRAG_TAG);
+        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
+        ChatTable chatTable = new ChatTable(ref, FirebaseAuth.getInstance().getUid(), userID);
+        chatTable.updateChildren(chatTable.toMap());
     }
-
-    @Override
-    public void updateItem(int position) {
-        System.out.println(position);
-        this.position = position;
-    }*/
 }
