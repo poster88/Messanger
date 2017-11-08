@@ -7,20 +7,26 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Adapter;
 
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.FirebaseUserAdapter;
+import com.example.user.simplechat.adapter.UserRecycleAdapter;
+import com.example.user.simplechat.listener.ChildValueListener;
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
@@ -29,10 +35,13 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment implements FirebaseUserAdapter.MyClickListener{
+public class ChatListFragment extends BaseFragment {
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
     private int position;
     private String currentUserID;
+    private ArrayList<User> usersListData;
+    private RecyclerView.Adapter adapter;
+    private RecyclerView.LayoutManager layoutManager;
 
     private FirebaseUserAdapter usersListAdapter;
 
@@ -46,7 +55,55 @@ public class ChatListFragment extends BaseFragment implements FirebaseUserAdapte
         if (savedInstanceState == null) {
             setRetainInstance(true);
             currentUserID = FirebaseAuth.getInstance().getUid();
-            DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://messager-c419d.firebaseio.com/ChatIDTable/" + currentUserID);
+            usersListData = new ArrayList<>();
+            layoutManager = new LinearLayoutManager(getActivity());
+
+            Query query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
+            query.addListenerForSingleValueEvent(new ValueListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    for (DataSnapshot data: dataSnapshot.getChildren()) {
+                        //System.out.println(data.toString());
+                    }
+                }
+            });
+            query.addChildEventListener(new ChildValueListener() {
+
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)){
+                        usersListData.add(dataSnapshot.getValue(User.class));
+                    }
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                    super.onChildChanged(dataSnapshot, s);
+                    System.out.println(dataSnapshot.toString() + "onChildChanged string : " + s);
+                    Map<String, String> map = new HashMap<>();
+                    //перезаписати мапу
+
+                    System.out.println(usersListData + " index ");
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+                    super.onChildRemoved(dataSnapshot);
+                    System.out.println(dataSnapshot.toString() + "onChildRemoved" );
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+                    super.onChildMoved(dataSnapshot, s);
+                    System.out.println(dataSnapshot.toString() + "onChildMoved string : " + s);
+                }
+            });
+
+
+            //usersRecView.setAdapter(adapter);
+
+
+            /*DatabaseReference ref = FirebaseDatabase.getInstance().getReferenceFromUrl("https://messager-c419d.firebaseio.com/ChatIDTable");
             ref.addValueEventListener(new ValueListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
@@ -58,11 +115,11 @@ public class ChatListFragment extends BaseFragment implements FirebaseUserAdapte
                     }
                     System.out.println(usersIDArray.size() + " size");
                     usersListAdapter = new FirebaseUserAdapter(setFirebaseRecyclerOptions(), FirebaseAuth.getInstance().getUid(), usersIDArray);
-                    usersListAdapter.setMyOnClickListener(ChatListFragment.this);
+                    //usersListAdapter.setMyOnClickListener(ChatListFragment.this);
                     usersListAdapter.startListening();
                     setRecycleView();
                 }
-            });
+            });*/
         }
     }
 
@@ -71,13 +128,17 @@ public class ChatListFragment extends BaseFragment implements FirebaseUserAdapte
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
+
+        usersRecView.setLayoutManager(layoutManager);
+        adapter = new UserRecycleAdapter(usersListData, getContext());
+        usersRecView.setAdapter(adapter);
         return view;
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        usersListAdapter.stopListening();
+        //usersListAdapter.stopListening();
     }
 
     private FirebaseRecyclerOptions<User> setFirebaseRecyclerOptions() {
@@ -90,7 +151,7 @@ public class ChatListFragment extends BaseFragment implements FirebaseUserAdapte
         usersRecView.setAdapter(usersListAdapter);
     }
 
-    @Override
+    /*@Override
     public void onItemClick(String userID) {
         //super.replaceFragments(ChatFragment.newInstance(userID), Const.CHAT_FRAG_TAG);
     }
@@ -99,5 +160,5 @@ public class ChatListFragment extends BaseFragment implements FirebaseUserAdapte
     public void updateItem(int position) {
         System.out.println(position);
         this.position = position;
-    }
+    }*/
 }
