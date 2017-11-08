@@ -35,6 +35,30 @@ public class User {
         return result;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (userID != null ? !userID.equals(user.userID) : user.userID != null) return false;
+        if (imageUrl != null ? !imageUrl.equals(user.imageUrl) : user.imageUrl != null)
+            return false;
+        if (userName != null ? !userName.equals(user.userName) : user.userName != null)
+            return false;
+        return userEmail != null ? userEmail.equals(user.userEmail) : user.userEmail == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userID != null ? userID.hashCode() : 0;
+        result = 31 * result + (imageUrl != null ? imageUrl.hashCode() : 0);
+        result = 31 * result + (userName != null ? userName.hashCode() : 0);
+        result = 31 * result + (userEmail != null ? userEmail.hashCode() : 0);
+        return result;
+    }
+
     public void setUserID(String userID) {
         this.userID = userID;
     }

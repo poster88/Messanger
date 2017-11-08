@@ -31,11 +31,9 @@ import butterknife.ButterKnife;
 
 public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder>{
     private ArrayList<User> usersListData;
-    private Context context;
 
-    public UserRecycleAdapter(ArrayList<User> usersListData, Context context) {
+    public UserRecycleAdapter(ArrayList<User> usersListData) {
         this.usersListData = usersListData;
-        this.context = context;
     }
 
     @Override
@@ -98,7 +96,6 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;
-
 
         public UserViewHolder(View itemView) {
             super(itemView);
