@@ -11,6 +11,7 @@ public final class Const {
 
     public static final String USER_ID = "userID";
     public static final String RECEIVER_ID = "receiverID";
+    public static final String CHAT_ID = "chatID";
     public static final String USERS_IMAGES = "users_images";
     public static final String USER_INFO = "UserInfo";
     public static final String PHOTO_DEFAULT = "default";

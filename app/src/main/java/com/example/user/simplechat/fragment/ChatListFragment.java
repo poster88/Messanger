@@ -11,7 +11,7 @@ import android.view.ViewGroup;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
-import com.example.user.simplechat.model.ChatTable;
+import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
@@ -77,6 +77,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            //TODO: set a better of Collection interface
             if (!enabledChatUsersData.contains(dataSnapshot.getKey())){
                 enabledChatUsersData.add(dataSnapshot.getKey());
                 for (int i = 0; i < usersListData.size(); i++) {
@@ -104,7 +105,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         currentUserID = FirebaseAuth.getInstance().getUid();
         usersListData = new ArrayList<>();
         enabledChatUsersData = new ArrayList<>();
-        layoutManager = new LinearLayoutManager(getActivity());
         query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
         chatTableRef = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
@@ -114,6 +114,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
+        layoutManager = new LinearLayoutManager(getActivity());
         if (savedInstanceState == null){
             innitAdapter();
         }
@@ -147,6 +148,17 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     @Override
+    public void onItemClick(final String userID) {
+        chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                String chatID = (dataSnapshot.getValue(String.class));
+                ChatListFragment.super.replaceFragments(ChatFragment.newInstance(userID, chatID), Const.CHAT_FRAG_TAG);
+            }
+        });
+    }
+
+    @Override
     public void onStart() {
         super.onStart();
         if (query != null && chatTableRef != null){
@@ -165,9 +177,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     @Override
-    public void onItemClick(String userID) {
-        DatabaseReference ref = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
-        ChatTable chatTable = new ChatTable(ref, FirebaseAuth.getInstance().getUid(), userID);
-        chatTable.updateChildren(chatTable.toMap());
+    public void onDetach() {
+        super.onDetach();
     }
 }
