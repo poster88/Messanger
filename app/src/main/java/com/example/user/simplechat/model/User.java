@@ -1,5 +1,8 @@
 package com.example.user.simplechat.model;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -7,7 +10,7 @@ import java.util.Map;
  * Created by User on 005 05.10.17.
  */
 
-public class User {
+public class User implements Parcelable{
     private String userID;
     private String imageUrl;
     private String userName;
@@ -23,6 +26,13 @@ public class User {
         this.userEmail = userEmail;
     }
 
+    public User(Parcel parcel) {
+        userID = parcel.readString();
+        imageUrl = parcel.readString();
+        userName = parcel.readString();
+        userEmail = parcel.readString();
+    }
+
     public Map<String, Object> toMap(){
         Map<String, String> userInfo = new HashMap<>();
         userInfo.put("userID", userID);
@@ -32,6 +42,30 @@ public class User {
 
         Map<String, Object> result = new HashMap<>();
         result.put(userID, userInfo);
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        User user = (User) o;
+
+        if (userID != null ? !userID.equals(user.userID) : user.userID != null) return false;
+        if (imageUrl != null ? !imageUrl.equals(user.imageUrl) : user.imageUrl != null)
+            return false;
+        if (userName != null ? !userName.equals(user.userName) : user.userName != null)
+            return false;
+        return userEmail != null ? userEmail.equals(user.userEmail) : user.userEmail == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = userID != null ? userID.hashCode() : 0;
+        result = 31 * result + (imageUrl != null ? imageUrl.hashCode() : 0);
+        result = 31 * result + (userName != null ? userName.hashCode() : 0);
+        result = 31 * result + (userEmail != null ? userEmail.hashCode() : 0);
         return result;
     }
 
@@ -66,4 +100,30 @@ public class User {
     public String getUserEmail() {
         return userEmail;
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(userID);
+        parcel.writeString(imageUrl);
+        parcel.writeString(userName);
+        parcel.writeString(userEmail);
+    }
+
+    public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>(){
+
+        @Override
+        public User createFromParcel(Parcel parcel) {
+            return new User(parcel);
+        }
+
+        @Override
+        public User[] newArray(int i) {
+            return new User[i];
+        }
+    };
 }

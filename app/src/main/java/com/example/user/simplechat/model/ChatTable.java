@@ -20,15 +20,14 @@ public class ChatTable {
         this.receiverID = receiverID;
     }
 
-    private String genChatLink(){
-        return ref.push().getKey();
-    }
-
     public Map<String, Object> toMap(){
         Map<String, Object> chatLinks = new HashMap<>();
         chatLinks.put(receiverID, genChatLink());
-
         return chatLinks;
+    }
+
+    private String genChatLink(){
+        return ref.push().getKey();
     }
 
     public void updateChildren(Map<String, Object> map){

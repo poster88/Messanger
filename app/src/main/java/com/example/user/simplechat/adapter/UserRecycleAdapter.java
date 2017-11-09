@@ -1,6 +1,5 @@
 package com.example.user.simplechat.adapter;
 
-import android.content.Context;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -31,11 +30,12 @@ import butterknife.ButterKnife;
 
 public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder>{
     private ArrayList<User> usersListData;
-    private Context context;
+    private ArrayList<String> enabledChatUsersData;
+    private MyClickListener myClickListener;
 
-    public UserRecycleAdapter(ArrayList<User> usersListData, Context context) {
+    public UserRecycleAdapter(ArrayList<User> usersListData, ArrayList<String> enabledChatUsersData) {
         this.usersListData = usersListData;
-        this.context = context;
+        this.enabledChatUsersData = enabledChatUsersData;
     }
 
     @Override
@@ -45,9 +45,20 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     @Override
-    public void onBindViewHolder(UserViewHolder holder, int position) {
+    public void onBindViewHolder(final UserViewHolder holder, int position) {
         setUserImage(holder, usersListData.get(position));
         holder.userName.setText(usersListData.get(position).getUserName());
+        String chatStatus = "no chat";
+        if (enabledChatUsersData.contains(usersListData.get(position).getUserID())){
+            chatStatus = "continue chat";
+        }
+        holder.chatStatus.setText(chatStatus);
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                myClickListener.onItemClick(usersListData.get(holder.getAdapterPosition()).getUserID());
+            }
+        });
     }
 
     @Override
@@ -93,12 +104,19 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         }
     }
 
+    public void setMyClickListener(MyClickListener myClickListener) {
+        this.myClickListener = myClickListener;
+    }
+
+    public interface MyClickListener {
+        void onItemClick(String userID);
+    }
+
     public static class UserViewHolder extends RecyclerView.ViewHolder{
         @BindView(R.id.itemUserImage) ImageView userImage;
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;
-
 
         public UserViewHolder(View itemView) {
             super(itemView);
