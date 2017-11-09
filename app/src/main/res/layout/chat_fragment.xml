@@ -10,31 +10,28 @@
         android:id="@+id/chatContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/messageAreaContainer"
-        android:background="#afafaf"></android.support.v7.widget.RecyclerView>
+        android:layout_above="@+id/messageArea"
+        android:background="#c4bbbb"/>
 
-    <RelativeLayout
-        android:id="@+id/messageAreaContainer"
+    <EditText
+        android:id="@+id/messageArea"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true">
+        android:layout_toLeftOf="@+id/sendMassageBtn"
+        android:hint="set message here ..."
+        android:maxLength="128"
+        android:textSize="20sp"
+        android:layout_marginLeft="12dp"
+        android:layout_marginTop="16dp"
+        android:layout_alignParentBottom="true"/>
 
-        <EditText
-            android:id="@+id/messageArea"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_toLeftOf="@+id/sendMassageBtn"
-            android:hint="set message here ..."
-            android:maxLength="128"
-            android:textSize="20sp" />
-
-        <ImageButton
-            android:id="@+id/sendMassageBtn"
-            android:layout_width="60dp"
-            android:layout_height="60dp"
-            android:layout_alignParentRight="true"
-            android:layout_marginLeft="6dp"
-            android:layout_marginRight="12dp"
-            android:layout_marginTop="12dp" />
-    </RelativeLayout>
+    <ImageButton
+        android:id="@+id/sendMassageBtn"
+        android:src="@drawable/ic_send_black_24dp"
+        android:layout_width="60dp"
+        android:layout_height="60dp"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="6dp"
+        android:layout_marginRight="12dp"
+        android:layout_alignParentBottom="true"/>
 </RelativeLayout>
