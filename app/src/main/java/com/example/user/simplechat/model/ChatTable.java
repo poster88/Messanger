@@ -1,6 +1,8 @@
 package com.example.user.simplechat.model;
 
-import com.google.firebase.database.DatabaseReference;
+
+import android.os.Parcel;
+import android.os.Parcelable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,36 +12,21 @@ import java.util.Map;
  */
 
 public class ChatTable {
-    private String senderID;
     private String receiverID;
-    private DatabaseReference ref;
+    private String chatID;
 
-    public ChatTable(DatabaseReference ref, String senderID, String receiverID) {
-        this.ref = ref;
-        this.senderID = senderID;
+    public ChatTable() {
+    }
+
+    public ChatTable(String chatID, String receiverID) {
+        this.chatID = chatID;
         this.receiverID = receiverID;
     }
 
     public Map<String, Object> toMap(){
         Map<String, Object> chatLinks = new HashMap<>();
-        chatLinks.put(receiverID, genChatLink());
+        chatLinks.put(receiverID, chatID);
         return chatLinks;
-    }
-
-    private String genChatLink(){
-        return ref.push().getKey();
-    }
-
-    public void updateChildren(Map<String, Object> map){
-        ref.updateChildren(map);
-    }
-
-    public void setSenderID(String senderID) {
-        this.senderID = senderID;
-    }
-
-    public String getSenderID() {
-        return senderID;
     }
 
     public void setReceiverID(String receiverID) {
@@ -50,11 +37,11 @@ public class ChatTable {
         return receiverID;
     }
 
-    public void setRef(DatabaseReference ref) {
-        this.ref = ref;
+    public void setChatID(String chatID) {
+        this.chatID = chatID;
     }
 
-    public DatabaseReference getRef() {
-        return ref;
+    public String getChatID() {
+        return chatID;
     }
 }

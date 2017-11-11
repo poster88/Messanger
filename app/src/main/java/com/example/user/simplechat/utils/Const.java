@@ -28,6 +28,7 @@ public final class Const {
     public static final String IS_TASK_RUNNING_KEY = "isTaskRunning";
     public static final String USER_IMAGE_KEY = "userImageKey";
     public static final String USER_LIST_DATA_KEY = "userListDataKey";
+    public static final String CHAT_LIST_DATA_KEY = "chatListDataKey";
     public static final String CHAT_ID_TABLE_DATA_KEY = "enabledChatUsersDataKey";
     public static final String LAYOUT_MANAGER_KEY = "layoutManagerKey";
     public static final String DEFAULT_IMAGE_KEY = "default";

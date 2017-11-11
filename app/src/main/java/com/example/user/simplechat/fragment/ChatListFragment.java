@@ -77,7 +77,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            //TODO: set a better of Collection interface
             if (!enabledChatUsersData.contains(dataSnapshot.getKey())){
                 enabledChatUsersData.add(dataSnapshot.getKey());
                 for (int i = 0; i < usersListData.size(); i++) {
@@ -152,10 +151,19 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String chatID = (dataSnapshot.getValue(String.class));
-                ChatListFragment.super.replaceFragments(ChatFragment.newInstance(userID, chatID), Const.CHAT_FRAG_TAG);
+                ChatListFragment.super.replaceFragments(ChatFragment.newInstance(
+                        userID,
+                        checkDataSnapshot(dataSnapshot, chatTableRef)),
+                        Const.CHAT_FRAG_TAG);
             }
         });
+    }
+
+    private String checkDataSnapshot(DataSnapshot dataSnapshot, DatabaseReference ref) {
+        if (dataSnapshot.exists()){
+            return (dataSnapshot.getValue(String.class));
+        }
+        return ref.push().getKey();
     }
 
     @Override
@@ -174,10 +182,5 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
     }
 }
