@@ -12,6 +12,7 @@ import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
 import com.example.user.simplechat.listener.ValueListener;
+import com.example.user.simplechat.model.ChatTable;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
@@ -37,7 +38,9 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private UserRecycleAdapter adapter;
     private LinearLayoutManager layoutManager;
     private DatabaseReference chatTableRef;
+    private FirebaseDatabase database;
     private Query query;
+    private int position = 0;
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -102,10 +105,11 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
 
     private void innitDataForQuery() {
         currentUserID = FirebaseAuth.getInstance().getUid();
+        database = FirebaseDatabase.getInstance();
         usersListData = new ArrayList<>();
         enabledChatUsersData = new ArrayList<>();
         query = FirebaseDatabase.getInstance().getReferenceFromUrl(Const.REF_USERS).orderByChild(Const.QUERY_NAME_KEY);
-        chatTableRef = FirebaseDatabase.getInstance().getReference(Const.CHAT_ID_TABLE).child(currentUserID);
+        chatTableRef = database.getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
 
     @Nullable
@@ -126,6 +130,9 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
+        position = layoutManager.findLastVisibleItemPosition();
+        outState.putInt("int", position);
+        System.out.println("CompletelyVisibleItemPosition : " + layoutManager.findLastCompletelyVisibleItemPosition() + " findLastVisibleItemPosition" + layoutManager.findLastVisibleItemPosition());
     }
 
     @Override
@@ -135,6 +142,8 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             usersListData = savedInstanceState.getParcelableArrayList(Const.USER_LIST_DATA_KEY);
             enabledChatUsersData = savedInstanceState.getStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY);
             layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
+            position = savedInstanceState.getInt("int");
+            System.out.println("CompletelyVisibleItemPosition : " + layoutManager.findLastCompletelyVisibleItemPosition() + " findLastVisibleItemPosition" + layoutManager.findLastVisibleItemPosition());
             innitAdapter();
         }
     }
@@ -151,19 +160,25 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ChatListFragment.super.replaceFragments(ChatFragment.newInstance(
-                        userID,
-                        checkDataSnapshot(dataSnapshot, chatTableRef)),
-                        Const.CHAT_FRAG_TAG);
+                ChatListFragment.super.replaceFragments(ChatFragment
+                        .newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID)), Const.CHAT_FRAG_TAG);
             }
         });
     }
 
-    private String checkDataSnapshot(DataSnapshot dataSnapshot, DatabaseReference ref) {
-        if (dataSnapshot.exists()){
-            return (dataSnapshot.getValue(String.class));
+    private String checkDataSnapshot(DataSnapshot dataSnapshot, DatabaseReference ref, String receiverID) {
+        String chatID = dataSnapshot.getValue(String.class);
+        if (chatID == null){
+            chatID = ref.push().getKey();
+            createChatWithUser(currentUserID, receiverID, chatID);
+            createChatWithUser(receiverID, currentUserID, chatID);
         }
-        return ref.push().getKey();
+        return chatID;
+    }
+
+    private void createChatWithUser(String currentID, String receiverID, String chatID){
+        ChatTable chatTable = new ChatTable(chatID, receiverID);
+        database.getReference(Const.CHAT_ID_TABLE).child(currentID).updateChildren(chatTable.toMap());
     }
 
     @Override
@@ -182,5 +197,11 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
         }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        layoutManager.scrollToPosition(position);
     }
 }

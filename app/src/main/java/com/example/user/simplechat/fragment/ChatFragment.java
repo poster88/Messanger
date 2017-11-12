@@ -12,7 +12,6 @@ import android.widget.EditText;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.ChatRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
-import com.example.user.simplechat.model.ChatTable;
 import com.example.user.simplechat.model.Message;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
@@ -38,13 +37,13 @@ public class ChatFragment extends BaseFragment{
     @BindView(R.id.messageArea) EditText messageEditText;
 
     private String currentID;
-    private String receiverID;
     private String chatID;
     private FirebaseDatabase database;
     private Query messageQuery;
     private ArrayList<Message> messageArray;
     private LinearLayoutManager layoutManager;
     private ChatRecycleAdapter adapter;
+    private DatabaseReference chatArchiveRef;
 
 
     public static ChatFragment newInstance(String receiverID, String chatID){
@@ -72,14 +71,13 @@ public class ChatFragment extends BaseFragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         innitDataForQuery();
-        messageQuery = database.getReference(Const.CHAT_ARCHIVE).child(chatID).limitToLast(6);
+        messageQuery = database.getReference(Const.CHAT_ARCHIVE).child(chatID).limitToLast(25);
     }
 
     private void innitDataForQuery() {
         messageArray = new ArrayList<>();
         database = FirebaseDatabase.getInstance();
         currentID = FirebaseAuth.getInstance().getUid();
-        receiverID = getArguments().getString(Const.RECEIVER_ID);
         chatID = getArguments().getString(Const.CHAT_ID);
     }
 
@@ -93,6 +91,12 @@ public class ChatFragment extends BaseFragment{
         return view;
     }
 
+    private void innitAdapter() {
+        adapter = new ChatRecycleAdapter(messageArray, currentID);
+        chatRecyclerView.setLayoutManager(layoutManager);
+        chatRecyclerView.setAdapter(adapter);
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
@@ -103,16 +107,12 @@ public class ChatFragment extends BaseFragment{
         }
     }
 
-    private void innitAdapter() {
-        adapter = new ChatRecycleAdapter(messageArray, FirebaseAuth.getInstance().getUid());
-        chatRecyclerView.setLayoutManager(layoutManager);
-        chatRecyclerView.setAdapter(adapter);
-    }
-
     @Override
     public void onStart() {
         super.onStart();
-        if (messageQuery != null) messageQuery.addChildEventListener(chatDataListener);
+        if (messageQuery != null){
+            messageQuery.addChildEventListener(chatDataListener);
+        }
     }
 
     @Override
@@ -125,30 +125,19 @@ public class ChatFragment extends BaseFragment{
     @Override
     public void onStop() {
         super.onStop();
-        if (messageQuery != null) messageQuery.removeEventListener(chatDataListener);
+        if (messageQuery != null) {
+            messageQuery.removeEventListener(chatDataListener);
+        }
     }
 
     @OnClick(R.id.sendMassageBtn)
     public void setMessage(){
         if (messageEditText.length() != 0){
-            isChatExist();
-            DatabaseReference ref = database.getReference(Const.CHAT_ARCHIVE).child(chatID);
             Map<String, Object> mapMessage = new HashMap<>();
-            mapMessage.put(ref.push().getKey(), new Message(currentID, messageEditText.getText().toString()));
-            ref.updateChildren(mapMessage);
+            chatArchiveRef = database.getReference(Const.CHAT_ARCHIVE).child(chatID);
+            mapMessage.put(chatArchiveRef.push().getKey(), new Message(currentID, messageEditText.getText().toString()));
+            chatArchiveRef.updateChildren(mapMessage);
             messageEditText.setText(null);
         }
-    }
-
-    private void isChatExist() {
-        if (messageArray.size() == 0){
-            createChatWithUser(currentID, receiverID);
-            createChatWithUser(receiverID, currentID);
-        }
-    }
-
-    private void createChatWithUser(String currentID, String receiverID){
-        ChatTable chatTable = new ChatTable(chatID, receiverID);
-        database.getReference(Const.CHAT_ID_TABLE).child(currentID).updateChildren(chatTable.toMap());
     }
 }
