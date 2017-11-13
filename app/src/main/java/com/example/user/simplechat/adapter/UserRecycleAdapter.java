@@ -53,12 +53,23 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
             chatStatus = "continue chat";
         }
         holder.chatStatus.setText(chatStatus);
+        if (usersListData.get(position).getUserName().equals("test4")){
+            System.out.println("found " + usersListData.get(position).getIsOnline());
+        }
+        holder.onlineStatus.setImageResource(setImageStatus(usersListData.get(position).getIsOnline()));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 myClickListener.onItemClick(usersListData.get(holder.getAdapterPosition()).getUserID());
             }
         });
+    }
+
+    private int setImageStatus(boolean isOnline) {
+        if (isOnline) {
+            return R.drawable.ic_is_online_24dp;
+        }
+        return R.drawable.ic_is_offline_24dp;
     }
 
     @Override
@@ -117,6 +128,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;
+        @BindView(R.id.onlineStatus) ImageView onlineStatus;
 
         public UserViewHolder(View itemView) {
             super(itemView);

@@ -35,11 +35,10 @@
         android:layout_alignParentRight="true" />
 
     <ImageView
-        android:id="@+id/loginStatus"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:background="#ff0000"
+        android:id="@+id/onlineStatus"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
         android:layout_marginRight="6dp"
-        android:layout_toLeftOf="@id/chatStatus"
-        />
+        android:layout_marginLeft="16dp"
+        android:layout_toRightOf="@id/itemUserName" />
 </RelativeLayout>

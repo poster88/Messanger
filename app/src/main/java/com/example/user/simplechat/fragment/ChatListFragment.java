@@ -40,7 +40,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private DatabaseReference chatTableRef;
     private FirebaseDatabase database;
     private Query query;
-    private int position = 0;
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -130,9 +129,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
-        position = layoutManager.findLastVisibleItemPosition();
-        outState.putInt("int", position);
-        System.out.println("CompletelyVisibleItemPosition : " + layoutManager.findLastCompletelyVisibleItemPosition() + " findLastVisibleItemPosition" + layoutManager.findLastVisibleItemPosition());
     }
 
     @Override
@@ -142,8 +138,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             usersListData = savedInstanceState.getParcelableArrayList(Const.USER_LIST_DATA_KEY);
             enabledChatUsersData = savedInstanceState.getStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY);
             layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
-            position = savedInstanceState.getInt("int");
-            System.out.println("CompletelyVisibleItemPosition : " + layoutManager.findLastCompletelyVisibleItemPosition() + " findLastVisibleItemPosition" + layoutManager.findLastVisibleItemPosition());
             innitAdapter();
         }
     }
@@ -197,11 +191,5 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
         }
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        layoutManager.scrollToPosition(position);
     }
 }

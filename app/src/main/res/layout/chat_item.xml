@@ -4,7 +4,8 @@
     android:id="@+id/chatLayout"
     android:orientation="vertical"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:background="@drawable/ic_chat_bubble_black_24dp">
 
     <TextView
         android:id="@+id/senderName"

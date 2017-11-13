@@ -15,15 +15,17 @@ public class User implements Parcelable{
     private String imageUrl;
     private String userName;
     private String userEmail;
+    private boolean isOnline;
 
     public User() {
     }
 
-    public User(String userID, String imageUrl, String userName, String userEmail) {
+    public User(String userID, String imageUrl, String userName, String userEmail, boolean isOnline) {
         this.userID = userID;
         this.imageUrl = imageUrl;
         this.userName = userName;
         this.userEmail = userEmail;
+        this.isOnline = isOnline;
     }
 
     public User(Parcel parcel) {
@@ -31,14 +33,16 @@ public class User implements Parcelable{
         imageUrl = parcel.readString();
         userName = parcel.readString();
         userEmail = parcel.readString();
+        isOnline = parcel.readByte() != 0;
     }
 
     public Map<String, Object> toMap(){
-        Map<String, String> userInfo = new HashMap<>();
+        Map<String, Object> userInfo = new HashMap<>();
         userInfo.put("userID", userID);
         userInfo.put("imageUrl", imageUrl);
         userInfo.put("userName", userName);
         userInfo.put("userEmail", userEmail);
+        userInfo.put("isOnline", isOnline);
 
         Map<String, Object> result = new HashMap<>();
         result.put(userID, userInfo);
@@ -52,6 +56,7 @@ public class User implements Parcelable{
 
         User user = (User) o;
 
+        if (isOnline != user.isOnline) return false;
         if (userID != null ? !userID.equals(user.userID) : user.userID != null) return false;
         if (imageUrl != null ? !imageUrl.equals(user.imageUrl) : user.imageUrl != null)
             return false;
@@ -66,6 +71,7 @@ public class User implements Parcelable{
         result = 31 * result + (imageUrl != null ? imageUrl.hashCode() : 0);
         result = 31 * result + (userName != null ? userName.hashCode() : 0);
         result = 31 * result + (userEmail != null ? userEmail.hashCode() : 0);
+        result = 31 * result + (isOnline ? 1 : 0);
         return result;
     }
 
@@ -101,6 +107,14 @@ public class User implements Parcelable{
         return userEmail;
     }
 
+    public void setOnline(boolean online) {
+        isOnline = online;
+    }
+
+    public boolean getIsOnline() {
+        return isOnline;
+    }
+
     @Override
     public int describeContents() {
         return 0;
@@ -112,6 +126,7 @@ public class User implements Parcelable{
         parcel.writeString(imageUrl);
         parcel.writeString(userName);
         parcel.writeString(userEmail);
+        parcel.writeByte((byte) (isOnline ? 1 : 0));
     }
 
     public static final Parcelable.Creator<User> CREATOR = new Parcelable.Creator<User>(){
