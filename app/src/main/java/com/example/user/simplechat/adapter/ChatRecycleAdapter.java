@@ -37,15 +37,23 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
 
     @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
-        holder.senderNameView.setText(messageArray.get(position).getAuthorID());
+        holder.senderNameView.setText("author");
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(messageArray.get(position).getMessageTime());
         holder.chatLayout.setGravity(checkLayoutGravity(currentID, messageArray.get(position).getAuthorID()));
+        holder.senderMessageView.setBackgroundResource(checkLayoutRecourse(currentID, messageArray.get(position).getAuthorID()));
     }
 
     @Override
     public int getItemCount() {
         return messageArray == null ? 0 : messageArray.size();
+    }
+
+    private int checkLayoutRecourse(String currentID, String userID){
+        if (!currentID.equals(userID)){
+            return R.drawable.right;
+        }
+        return R.drawable.left;
     }
 
     private int checkLayoutGravity(String currentID, String userID){
