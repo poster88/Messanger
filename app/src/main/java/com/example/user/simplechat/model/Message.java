@@ -30,31 +30,6 @@ public class Message implements Parcelable{
         messageTime = parcel.readString();
     }
 
-    public String getAuthorID() {
-        return authorID;
-    }
-
-    public void setAuthorID(String authorID) {
-        this.authorID = authorID;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public String getMessageTime() {
-        return messageTime;
-    }
-
-    public String setMessageTime() {
-        messageTime = new SimpleDateFormat("HH:mm").format(Calendar.getInstance().getTime());
-        return messageTime;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -75,6 +50,31 @@ public class Message implements Parcelable{
         result = 31 * result + (messageText != null ? messageText.hashCode() : 0);
         result = 31 * result + (messageTime != null ? messageTime.hashCode() : 0);
         return result;
+    }
+
+    public String getAuthorID() {
+        return authorID;
+    }
+
+    public void setAuthorID(String authorID) {
+        this.authorID = authorID;
+    }
+
+    public String getMessageText() {
+        return messageText;
+    }
+
+    public void setMessageText(String messageText) {
+        this.messageText = messageText;
+    }
+
+    public String setMessageTime() {
+        messageTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
+        return messageTime;
+    }
+
+    public String getMessageTime() {
+        return messageTime;
     }
 
     @Override

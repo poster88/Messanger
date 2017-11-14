@@ -41,7 +41,6 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(messageArray.get(position).getMessageTime());
         holder.chatLayout.setGravity(checkLayoutGravity(currentID, messageArray.get(position).getAuthorID()));
-        holder.senderMessageView.setBackgroundResource(checkLayoutRecourse(currentID, messageArray.get(position).getAuthorID()));
     }
 
     @Override
@@ -51,9 +50,9 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
 
     private int checkLayoutRecourse(String currentID, String userID){
         if (!currentID.equals(userID)){
-            return R.drawable.right;
+            return 0;
         }
-        return R.drawable.left;
+        return 0;
     }
 
     private int checkLayoutGravity(String currentID, String userID){
