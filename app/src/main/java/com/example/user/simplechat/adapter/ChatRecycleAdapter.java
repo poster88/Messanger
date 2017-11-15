@@ -41,7 +41,7 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         holder.senderNameView.setText("author");
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(formatTime(messageArray.get(position).getMessageTime()));
-        holder.chatLayout.setGravity(checkLayoutGravity(currentID, messageArray.get(position).getAuthorID()));
+        //holder.chatLayout.setGravity(checkLayoutGravity(currentID, messageArray.get(position).getAuthorID()));
     }
 
     private String formatTime(long time) {

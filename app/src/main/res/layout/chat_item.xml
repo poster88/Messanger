@@ -3,7 +3,7 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/chatLayout"
     android:orientation="vertical"
-    android:layout_width="match_parent"
+    android:layout_width="wrap_content"
     android:layout_height="wrap_content">
 
     <TextView
@@ -19,7 +19,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:textSize="14sp"
-        android:layout_margin="6dp" />
+        android:text="1231212234234234234234"
+        android:layout_margin="6dp"
+        android:background="@drawable/chat_left"/>
 
     <TextView
         android:id="@+id/messageTime"
