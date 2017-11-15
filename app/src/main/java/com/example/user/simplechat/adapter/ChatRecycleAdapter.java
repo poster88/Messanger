@@ -3,12 +3,10 @@ package com.example.user.simplechat.adapter;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -29,6 +27,8 @@ import butterknife.ButterKnife;
  */
 
 public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.ChatViewHolder>{
+    private final int VIEW_TYPE_LEFT = 0;
+    private final int VIEW_TYPE_RIGHT = 1;
     private ArrayList<Message> messageArray;
     private String currentID;
     private Bitmap myPhoto;
@@ -43,17 +43,34 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
 
     @Override
     public ChatViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-        View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.chat_item_left, parent, false);
+        View view;
+        LayoutInflater inflater = LayoutInflater.from(parent.getContext());
+        if (viewType == 0){
+            view = inflater.inflate(R.layout.chat_item_left, parent, false);
+        }else {
+            view = inflater.inflate(R.layout.chat_item_right, parent, false);
+        }
         return new ChatViewHolder(view);
     }
 
     @Override
+    public int getItemViewType(int position) {
+        int viewType;
+        if (messageArray.get(position).getAuthorID().equals(currentID)){
+            viewType = VIEW_TYPE_LEFT;
+        }else {
+            viewType = VIEW_TYPE_LEFT;
+        }
+        return viewType;
+    }
+
+    @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
+        holder.getItemViewType();
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(formatTime(messageArray.get(position).getMessageTime()));
         //holder.userPhotoView.setImageBitmap(checkBitmapForUser(currentID, messageArray.get(position).getAuthorID()));
         holder.userPhotoView.setImageResource(R.drawable.user_anonymous);
-
     }
 
     public void setRoundImageToView(Uri uri, ImageView view) {

@@ -106,11 +106,6 @@ public class MainActivity extends AppCompatActivity {
         auth.removeAuthStateListener(authStateListener);
     }
 
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-    }
-
     public FragmentManager getFm() {
         return fm;
     }
