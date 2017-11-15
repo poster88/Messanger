@@ -20,6 +20,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -135,9 +136,17 @@ public class ChatFragment extends BaseFragment{
         if (messageEditText.length() != 0){
             Map<String, Object> mapMessage = new HashMap<>();
             chatArchiveRef = database.getReference(Const.CHAT_ARCHIVE).child(chatID);
-            mapMessage.put(chatArchiveRef.push().getKey(), new Message(currentID, messageEditText.getText().toString()));
+            mapMessage.put(chatArchiveRef.push().getKey(), setMessageData());
             chatArchiveRef.updateChildren(mapMessage);
             messageEditText.setText(null);
         }
+    }
+
+    public Message setMessageData() {
+        Message message = new Message();
+        message.setAuthorID(currentID);
+        message.setMessageText(messageEditText.getText().toString());
+        message.setMessageTime((new Timestamp(System.currentTimeMillis())).getTime());
+        return message;
     }
 }

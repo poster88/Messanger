@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setIsOffline(){
-        if (currentID != null){
+        if (currentID != null && currentUser != null){
             currentUser.setOnline(false);
             updateChildren();
         }

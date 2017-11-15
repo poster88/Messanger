@@ -11,6 +11,7 @@ import android.widget.TextView;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.Message;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -39,8 +40,12 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
     public void onBindViewHolder(ChatViewHolder holder, int position) {
         holder.senderNameView.setText("author");
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
-        holder.messageTimeView.setText(messageArray.get(position).getMessageTime());
+        holder.messageTimeView.setText(formatTime(messageArray.get(position).getMessageTime()));
         holder.chatLayout.setGravity(checkLayoutGravity(currentID, messageArray.get(position).getAuthorID()));
+    }
+
+    private String formatTime(long time) {
+        return new SimpleDateFormat("M.dd 'at' HH:mm").format(time);
     }
 
     @Override

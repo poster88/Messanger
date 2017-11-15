@@ -3,9 +3,6 @@ package com.example.user.simplechat.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-
 /**
  * Created by User on 005 05.10.17.
  */
@@ -13,21 +10,44 @@ import java.util.Calendar;
 public class Message implements Parcelable{
     private String authorID;
     private String messageText;
-    private String messageTime;
+    private long messageTime;
 
     public Message() {
     }
 
-    public Message(String authorID, String messageText) {
+    public Message(String authorID, String messageText, long messageTime) {
         this.authorID = authorID;
         this.messageText = messageText;
-        this.messageTime = setMessageTime();
+        this.messageTime = messageTime;
     }
 
     public Message(Parcel parcel) {
         authorID = parcel.readString();
         messageText = parcel.readString();
-        messageTime = parcel.readString();
+    }
+
+    public void setAuthorID(String authorID) {
+        this.authorID = authorID;
+    }
+
+    public String getAuthorID() {
+        return authorID;
+    }
+
+    public void setMessageText(String messageText) {
+        this.messageText = messageText;
+    }
+
+    public String getMessageText() {
+        return messageText;
+    }
+
+    public void setMessageTime(long messageTime) {
+        this.messageTime = messageTime;
+    }
+
+    public long getMessageTime() {
+        return messageTime;
     }
 
     @Override
@@ -37,44 +57,18 @@ public class Message implements Parcelable{
 
         Message message = (Message) o;
 
+        if (messageTime != message.messageTime) return false;
         if (authorID != null ? !authorID.equals(message.authorID) : message.authorID != null)
             return false;
-        if (messageText != null ? !messageText.equals(message.messageText) : message.messageText != null)
-            return false;
-        return messageTime != null ? messageTime.equals(message.messageTime) : message.messageTime == null;
+        return messageText != null ? messageText.equals(message.messageText) : message.messageText == null;
     }
 
     @Override
     public int hashCode() {
         int result = authorID != null ? authorID.hashCode() : 0;
         result = 31 * result + (messageText != null ? messageText.hashCode() : 0);
-        result = 31 * result + (messageTime != null ? messageTime.hashCode() : 0);
+        result = 31 * result + (int) (messageTime ^ (messageTime >>> 32));
         return result;
-    }
-
-    public String getAuthorID() {
-        return authorID;
-    }
-
-    public void setAuthorID(String authorID) {
-        this.authorID = authorID;
-    }
-
-    public String getMessageText() {
-        return messageText;
-    }
-
-    public void setMessageText(String messageText) {
-        this.messageText = messageText;
-    }
-
-    public String setMessageTime() {
-        messageTime = new SimpleDateFormat("HH:mm:ss").format(Calendar.getInstance().getTime());
-        return messageTime;
-    }
-
-    public String getMessageTime() {
-        return messageTime;
     }
 
     @Override
@@ -86,7 +80,6 @@ public class Message implements Parcelable{
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(authorID);
         parcel.writeString(messageText);
-        parcel.writeString(messageTime);
     }
 
     public static final Parcelable.Creator<Message> CREATOR = new Creator<Message>() {
