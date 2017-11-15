@@ -1,5 +1,7 @@
 package com.example.user.simplechat.adapter;
 
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -19,6 +21,7 @@ import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.CircleTransform;
 import com.example.user.simplechat.utils.Const;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -60,9 +63,16 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                myClickListener.onItemClick(usersListData.get(holder.getAdapterPosition()).getUserID());
+                holder.userImage.setDrawingCacheEnabled(true);
+                holder.userImage.buildDrawingCache();
+                Bitmap bitmap = holder.userImage.getDrawingCache();
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+                byte[] data = baos.toByteArray();
+                myClickListener.onItemClick(usersListData.get(holder.getAdapterPosition()).getUserID(), data);
             }
         });
+
     }
 
     private int setImageStatus(boolean isOnline) {
@@ -120,7 +130,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     public interface MyClickListener {
-        void onItemClick(String userID);
+        void onItemClick(String userID, byte[] receiverArray);
     }
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{

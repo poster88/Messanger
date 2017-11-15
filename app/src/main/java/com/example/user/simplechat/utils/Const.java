@@ -34,6 +34,8 @@ public final class Const {
     public static final String LAYOUT_MANAGER_KEY = "layoutManagerKey";
     public static final String DEFAULT_IMAGE_KEY = "default";
     public static final String QUERY_NAME_KEY = "userName";
+    public static final String MY_PHOTO_B_KEY = "myPhotoKeyArray";
+    public static final String REC_PHOTO_B_KEY = "receiverPhotoArray";
 
     /*** keys for onActivityResult ***/
     public static final int REQUEST_READ_PERMISSION = 9003;

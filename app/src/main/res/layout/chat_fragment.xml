@@ -10,8 +10,7 @@
         android:id="@+id/chatContainer"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/messageArea"
-        android:background="#c4bbbb"/>
+        android:layout_above="@+id/messageArea" />
 
     <EditText
         android:id="@+id/messageArea"

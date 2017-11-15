@@ -1,5 +1,7 @@
 package com.example.user.simplechat.fragment;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -45,14 +47,18 @@ public class ChatFragment extends BaseFragment{
     private LinearLayoutManager layoutManager;
     private ChatRecycleAdapter adapter;
     private DatabaseReference chatArchiveRef;
+    private Bitmap myPhoto;
+    private Bitmap receiverPhoto;
 
 
-    public static ChatFragment newInstance(String receiverID, String chatID){
+    public static ChatFragment newInstance(String receiverID, String chatID, byte[] myPhotoArray, byte[] recPhotoArray){
         ChatFragment cf = new ChatFragment();
 
         Bundle args = new Bundle();
         args.putString(Const.RECEIVER_ID, receiverID);
         args.putString(Const.CHAT_ID, chatID);
+        args.putByteArray(Const.MY_PHOTO_B_KEY, myPhotoArray);
+        args.putByteArray(Const.REC_PHOTO_B_KEY, recPhotoArray);
         cf.setArguments(args);
         return cf;
     }
@@ -80,6 +86,12 @@ public class ChatFragment extends BaseFragment{
         database = FirebaseDatabase.getInstance();
         currentID = FirebaseAuth.getInstance().getUid();
         chatID = getArguments().getString(Const.CHAT_ID);
+
+        byte[] myPhotoArray = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
+        myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
+
+        byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);
+        receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
     }
 
     @Nullable
@@ -87,13 +99,14 @@ public class ChatFragment extends BaseFragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_fragment, container, false);
         bindFragment(this, view);
+
         layoutManager = new LinearLayoutManager(getContext());
         if (savedInstanceState == null) innitAdapter();
         return view;
     }
 
     private void innitAdapter() {
-        adapter = new ChatRecycleAdapter(messageArray, currentID);
+        adapter = new ChatRecycleAdapter(messageArray, currentID, myPhoto, receiverPhoto);
         chatRecyclerView.setLayoutManager(layoutManager);
         chatRecyclerView.setAdapter(adapter);
     }

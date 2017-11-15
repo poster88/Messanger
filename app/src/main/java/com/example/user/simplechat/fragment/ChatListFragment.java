@@ -129,6 +129,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
+
     }
 
     @Override
@@ -150,12 +151,14 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     @Override
-    public void onItemClick(final String userID) {
+    public void onItemClick(final String userID, final byte[] data) {
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ChatListFragment.super.replaceFragments(ChatFragment
-                        .newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID)), Const.CHAT_FRAG_TAG);
+                ChatListFragment.super.replaceFragments(
+                        ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), data, data),
+                        Const.CHAT_FRAG_TAG
+                );
             }
         });
     }
