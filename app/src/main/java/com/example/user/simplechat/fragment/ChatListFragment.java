@@ -1,5 +1,9 @@
 package com.example.user.simplechat.fragment;
 
+import android.content.ContentResolver;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -21,6 +25,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
+import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -40,6 +50,8 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private DatabaseReference chatTableRef;
     private FirebaseDatabase database;
     private Query query;
+    private Uri myPhotoUri;
+    private byte[] myArrayImage;
 
     public static ChatListFragment newInstance(){
         return new ChatListFragment();
@@ -49,9 +61,11 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             if (!usersListData.contains(dataSnapshot.getValue(User.class))){
-                if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)){
+                if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)) {
                     usersListData.add(dataSnapshot.getValue(User.class));
                     adapter.notifyItemInserted(usersListData.size());
+                }else {
+                    getUserImageUri();
                 }
             }
         }
@@ -75,6 +89,32 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             adapter.notifyItemRemoved(index);
         }
     };
+
+    public void getUserImageUri(){
+        DatabaseReference ref = database.getReference(Const.USER_INFO).child(currentUserID);
+        ref.addListenerForSingleValueEvent(new ValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                myPhotoUri = Uri.parse(dataSnapshot.getValue(User.class).getImageUrl());
+                myArrayImage = convertImageToByte(myPhotoUri);
+            }
+        });
+    }
+
+    public byte[] convertImageToByte(Uri uri){
+        byte[] data = null;
+        try {
+            ContentResolver cr = getActivity().getContentResolver();
+            InputStream inputStream = cr.openInputStream(uri);
+            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            data = baos.toByteArray();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
@@ -151,12 +191,12 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     @Override
-    public void onItemClick(final String userID, final byte[] data) {
+    public void onItemClick(final String userID, final byte[] myPhotoArray, final  byte[] recPhotoArray) {
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 ChatListFragment.super.replaceFragments(
-                        ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), data, data),
+                        ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), myArrayImage, recPhotoArray),
                         Const.CHAT_FRAG_TAG
                 );
             }

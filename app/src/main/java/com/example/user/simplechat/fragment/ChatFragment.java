@@ -88,10 +88,12 @@ public class ChatFragment extends BaseFragment{
         chatID = getArguments().getString(Const.CHAT_ID);
 
         byte[] myPhotoArray = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
-        myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
-
         byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);
-        receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
+
+        if (myPhotoArray != null|| receiverPhotoArray != null){
+            receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
+            myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
+        }
     }
 
     @Nullable

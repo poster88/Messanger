@@ -1,7 +1,6 @@
 package com.example.user.simplechat.adapter;
 
 import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -18,7 +17,6 @@ import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.User;
-import com.example.user.simplechat.utils.CircleTransform;
 import com.example.user.simplechat.utils.Const;
 
 import java.io.ByteArrayOutputStream;
@@ -26,6 +24,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by POSTER on 07.11.2017.
@@ -35,10 +34,15 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     private ArrayList<User> usersListData;
     private ArrayList<String> enabledChatUsersData;
     private MyClickListener myClickListener;
+    private byte[] myPhotoArray;
 
     public UserRecycleAdapter(ArrayList<User> usersListData, ArrayList<String> enabledChatUsersData) {
         this.usersListData = usersListData;
         this.enabledChatUsersData = enabledChatUsersData;
+    }
+
+    public void setMyPhotoArray(byte[] myPhotoArray) {
+        this.myPhotoArray = myPhotoArray;
     }
 
     @Override
@@ -56,23 +60,25 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
             chatStatus = "continue chat";
         }
         holder.chatStatus.setText(chatStatus);
-        if (usersListData.get(position).getUserName().equals("test4")){
-            System.out.println("found " + usersListData.get(position).getIsOnline());
-        }
         holder.onlineStatus.setImageResource(setImageStatus(usersListData.get(position).getIsOnline()));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                holder.userImage.setDrawingCacheEnabled(true);
-                holder.userImage.buildDrawingCache();
-                Bitmap bitmap = holder.userImage.getDrawingCache();
-                ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-                byte[] data = baos.toByteArray();
-                myClickListener.onItemClick(usersListData.get(holder.getAdapterPosition()).getUserID(), data);
+                myClickListener.onItemClick(
+                        usersListData.get(holder.getAdapterPosition()).getUserID(),
+                        myPhotoArray,
+                        setByteArrayFromImage(holder.userImage));
             }
         });
+    }
 
+    public byte[] setByteArrayFromImage(CircleImageView userImage){
+        userImage.setDrawingCacheEnabled(true);
+        userImage.buildDrawingCache();
+        Bitmap bitmap = userImage.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        return baos.toByteArray();
     }
 
     private int setImageStatus(boolean isOnline) {
@@ -95,7 +101,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         setRoundImageToView(Uri.parse(model.getImageUrl()), holder.userImage, holder.progressBar);
     }
 
-    private void setRoundImageToView(Uri uri, final ImageView view, final ProgressBar progressBar) {
+    private void setRoundImageToView(Uri uri, final CircleImageView view, final ProgressBar progressBar) {
         progressBar.setVisibility(View.VISIBLE);
         Glide.with(view.getContext())
                 .load(uri)
@@ -114,11 +120,10 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
                     }
                 }).crossFade()
                 .thumbnail(0.5f)
-                .bitmapTransform(new CircleTransform(view.getContext()))
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
     }
 
-    private void setImageDefault(ImageView imageView, ProgressBar progressBar) {
+    private void setImageDefault(CircleImageView imageView, ProgressBar progressBar) {
         imageView.setImageResource(R.drawable.user_anonymous);
         if (progressBar.getVisibility() == View.VISIBLE){
             progressBar.setVisibility(View.GONE);
@@ -130,11 +135,11 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     public interface MyClickListener {
-        void onItemClick(String userID, byte[] receiverArray);
+        void onItemClick(String userID, byte[] myPhotoArray, byte[] recPhotoArray);
     }
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{
-        @BindView(R.id.itemUserImage) ImageView userImage;
+        @BindView(R.id.itemUserImage) CircleImageView userImage;
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;

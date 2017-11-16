@@ -8,11 +8,12 @@
     android:layout_marginLeft="6dp"
     android:layout_marginRight="6dp">
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/itemUserPhoto"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:src="@drawable/user_anonymous"
+        android:layout_marginTop="26dp"
         android:layout_marginRight="6dp"
         android:layout_alignBottom="@id/messageTime"/>
 
@@ -34,7 +35,7 @@
         android:textSize="12sp"
         android:layout_marginLeft="6dp"
         android:layout_marginRight="6dp"
-        android:layout_marginBottom="6dp"
+        android:layout_marginBottom="0dp"
         android:textColor="#acacac"
         android:layout_below="@+id/senderMessage"
         android:layout_toRightOf="@id/itemUserPhoto" />

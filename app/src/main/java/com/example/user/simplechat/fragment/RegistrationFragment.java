@@ -3,7 +3,6 @@ package com.example.user.simplechat.fragment;
 import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -15,7 +14,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.example.user.simplechat.R;
@@ -29,19 +27,19 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
-import java.io.ByteArrayOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import butterknife.BindView;
 import butterknife.OnClick;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by User on 011 11.10.17.
  */
 
 public class RegistrationFragment extends BaseFragment {
-    @BindView(R.id.regUserImage) ImageView userImage;
+    @BindView(R.id.regUserImage) CircleImageView userImage;
     @BindView(R.id.regUserNameEdit) EditText userName;
     @BindView(R.id.regUserEmailEdit) EditText userEmail;
     @BindView(R.id.regPassEdit) EditText userPass;
@@ -89,7 +87,7 @@ public class RegistrationFragment extends BaseFragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState != null && photoUri != null){
-            super.setRoundImageToView(photoUri, userImage);
+            super.setImageToView(photoUri, userImage);
         }
     }
 
@@ -107,7 +105,7 @@ public class RegistrationFragment extends BaseFragment {
             isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
             photoUri = savedInstanceState.getParcelable(Const.USER_IMAGE_KEY);
             if (photoUri != null){
-                super.setRoundImageToView(photoUri, userImage);
+                super.setImageToView(photoUri, userImage);
             }
         }
         if (isTaskRunning){
@@ -146,7 +144,7 @@ public class RegistrationFragment extends BaseFragment {
         if (requestCode == Const.PHOTO_REQUEST){
             if (resultCode == Const.RESULT_OK){
                 photoUri = data.getData();
-                super.setRoundImageToView(photoUri, userImage);
+                super.setImageToView(photoUri, userImage);
             }
         }
     }
@@ -190,15 +188,7 @@ public class RegistrationFragment extends BaseFragment {
         if (photoUri != null){
             FirebaseStorage fs = FirebaseStorage.getInstance();
             StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
-
-            userImage.setDrawingCacheEnabled(true);
-            userImage.buildDrawingCache();
-            Bitmap bitmap = userImage.getDrawingCache();
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] data = baos.toByteArray();
-
-            UploadTask uTask = sr.putBytes(data);
+            UploadTask uTask = sr.putBytes(setByteArrayFromImage(userImage));
             uTask.addOnFailureListener(failureListener);
             uTask.addOnSuccessListener(addPhotoSuccessListener);
             return;

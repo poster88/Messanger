@@ -3,6 +3,7 @@ package com.example.user.simplechat.fragment;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -15,10 +16,12 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.activity.MainActivity;
-import com.example.user.simplechat.utils.CircleTransform;
+
+import java.io.ByteArrayOutputStream;
 
 import butterknife.ButterKnife;
 import butterknife.Unbinder;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 
 /**
@@ -33,13 +36,21 @@ public class BaseFragment extends Fragment {
         unbinder = ButterKnife.bind(target, view);
     }
 
-    public void setRoundImageToView(Uri uri, ImageView view) {
+    public void setImageToView(Uri uri, ImageView view) {
         Glide.with(this)
                 .load(uri)
                 .crossFade()
                 .thumbnail(0.5f)
-                .bitmapTransform(new CircleTransform(getContext()))
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
+    }
+
+    public byte[] setByteArrayFromImage(CircleImageView userImage){
+        userImage.setDrawingCacheEnabled(true);
+        userImage.buildDrawingCache();
+        Bitmap bitmap = userImage.getDrawingCache();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        return baos.toByteArray();
     }
 
     protected void replaceFragments(Fragment fragment, String tag){

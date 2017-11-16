@@ -1,26 +1,22 @@
 package com.example.user.simplechat.adapter;
 
 import android.graphics.Bitmap;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.Message;
-import com.example.user.simplechat.utils.CircleTransform;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import de.hdodenhof.circleimageview.CircleImageView;
 
 /**
  * Created by POSTER on 09.11.2017.
@@ -59,27 +55,17 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         if (messageArray.get(position).getAuthorID().equals(currentID)){
             viewType = VIEW_TYPE_LEFT;
         }else {
-            viewType = VIEW_TYPE_LEFT;
+            viewType = VIEW_TYPE_RIGHT;
         }
         return viewType;
     }
 
     @Override
     public void onBindViewHolder(ChatViewHolder holder, int position) {
-        holder.getItemViewType();
+        getItemViewType(position);
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(formatTime(messageArray.get(position).getMessageTime()));
-        //holder.userPhotoView.setImageBitmap(checkBitmapForUser(currentID, messageArray.get(position).getAuthorID()));
-        holder.userPhotoView.setImageResource(R.drawable.user_anonymous);
-    }
-
-    public void setRoundImageToView(Uri uri, ImageView view) {
-        Glide.with(view.getContext())
-                .load(uri)
-                .crossFade()
-                .thumbnail(0.5f)
-                .bitmapTransform(new CircleTransform(view.getContext()))
-                .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
+        holder.userPhotoView.setImageBitmap(checkBitmapForUser(currentID, messageArray.get(position).getAuthorID()));
     }
 
     private String formatTime(long time) {
@@ -95,12 +81,12 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         if (!currentID.equals(userID)){
             return receiverPhoto;
         }
-        return receiverPhoto;
+        return myPhoto;
     }
 
     public static class ChatViewHolder extends RecyclerView.ViewHolder{
         @BindView(R.id.senderMessage) TextView senderMessageView;
-        @BindView(R.id.itemUserPhoto) ImageView userPhotoView;
+        @BindView(R.id.itemUserPhoto) CircleImageView userPhotoView;
         @BindView(R.id.messageTime) TextView messageTimeView;
         @BindView(R.id.chatLayout) RelativeLayout chatLayout;
 
