@@ -34,15 +34,10 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     private ArrayList<User> usersListData;
     private ArrayList<String> enabledChatUsersData;
     private MyClickListener myClickListener;
-    private byte[] myPhotoArray;
 
     public UserRecycleAdapter(ArrayList<User> usersListData, ArrayList<String> enabledChatUsersData) {
         this.usersListData = usersListData;
         this.enabledChatUsersData = enabledChatUsersData;
-    }
-
-    public void setMyPhotoArray(byte[] myPhotoArray) {
-        this.myPhotoArray = myPhotoArray;
     }
 
     @Override
@@ -66,7 +61,6 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
             public void onClick(View view) {
                 myClickListener.onItemClick(
                         usersListData.get(holder.getAdapterPosition()).getUserID(),
-                        myPhotoArray,
                         setByteArrayFromImage(holder.userImage));
             }
         });
@@ -135,7 +129,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     public interface MyClickListener {
-        void onItemClick(String userID, byte[] myPhotoArray, byte[] recPhotoArray);
+        void onItemClick(String userID, byte[] recPhotoArray);
     }
 
     public static class UserViewHolder extends RecyclerView.ViewHolder{

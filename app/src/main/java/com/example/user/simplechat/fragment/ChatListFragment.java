@@ -4,6 +4,7 @@ import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,6 +13,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
@@ -27,11 +30,17 @@ import com.google.firebase.database.Query;
 
 import java.io.ByteArrayOutputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.util.ArrayList;
+import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 
@@ -50,7 +59,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private DatabaseReference chatTableRef;
     private FirebaseDatabase database;
     private Query query;
-    private Uri myPhotoUri;
     private byte[] myArrayImage;
 
     public static ChatListFragment newInstance(){
@@ -64,8 +72,6 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
                 if (!dataSnapshot.getValue(User.class).getUserID().equals(currentUserID)) {
                     usersListData.add(dataSnapshot.getValue(User.class));
                     adapter.notifyItemInserted(usersListData.size());
-                }else {
-                    getUserImageUri();
                 }
             }
         }
@@ -95,26 +101,39 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         ref.addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                myPhotoUri = Uri.parse(dataSnapshot.getValue(User.class).getImageUrl());
-                myArrayImage = convertImageToByte(myPhotoUri);
+                DownloadImageTask task = new DownloadImageTask();
+                try {
+                    URL url = new URL(dataSnapshot.getValue(User.class).getImageUrl());
+                    task.execute(url);
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
 
-    public byte[] convertImageToByte(Uri uri){
-        byte[] data = null;
-        try {
-            ContentResolver cr = getActivity().getContentResolver();
-            InputStream inputStream = cr.openInputStream(uri);
-            Bitmap bitmap = BitmapFactory.decodeStream(inputStream);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            data = baos.toByteArray();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+    public class DownloadImageTask extends AsyncTask<URL, Void, Bitmap> {
+
+        @Override
+        protected Bitmap doInBackground(URL... params) {
+            URL imageURL = params[0];
+            Bitmap downloadedBitmap = null;
+            try {
+                downloadedBitmap  = BitmapFactory.decodeStream((InputStream)imageURL.getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return downloadedBitmap;
         }
-        return data;
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            myArrayImage = baos.toByteArray();
+        }
     }
+
 
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
@@ -140,6 +159,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         innitDataForQuery();
+        getUserImageUri();
     }
 
     private void innitDataForQuery() {
@@ -191,7 +211,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     @Override
-    public void onItemClick(final String userID, final byte[] myPhotoArray, final  byte[] recPhotoArray) {
+    public void onItemClick(final String userID, final  byte[] recPhotoArray) {
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
