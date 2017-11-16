@@ -10,20 +10,16 @@ public final class Const {
     public static final String CHAT_ID_TABLE = "ChatIDTable";
     public static final String CHAT_USER_INFO = "UserInfo";
 
-    public static final String USER_ID = "userID";
     public static final String RECEIVER_ID = "receiverID";
     public static final String CHAT_ID = "chatID";
     public static final String USERS_IMAGES = "users_images";
     public static final String USER_INFO = "UserInfo";
     public static final String PHOTO_DEFAULT = "default";
-    public static final String PHOTO_URI = "photo_uri";
 
     /*** fragments tags ***/
     public static final String REGISTRATION_TAG = "RegistrationFragment";
     public static final String CHAT_LIST_TAG = "ChatListFragment";
     public static final String CHAT_FRAG_TAG = "ChatFragment";
-    public static final String LOGIN_FRAG_TAG = "LoginFragment";
-    public static final String TAG = "LOG_TAG";
 
     /*** keys for onSaveInstance ***/
     public static final String IS_TASK_RUNNING_KEY = "isTaskRunning";
@@ -41,4 +37,6 @@ public final class Const {
     public static final int REQUEST_READ_PERMISSION = 9003;
     public static final int PHOTO_REQUEST = 9002;
     public static final int RESULT_OK = -1;
+    public static final int VIEW_TYPE_LEFT = 0;
+    public static final int VIEW_TYPE_RIGHT = 1;
 }

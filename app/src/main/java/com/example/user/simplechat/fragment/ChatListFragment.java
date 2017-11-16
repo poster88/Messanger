@@ -1,9 +1,7 @@
 package com.example.user.simplechat.fragment;
 
-import android.content.ContentResolver;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -13,8 +11,6 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.Glide;
-import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
@@ -29,18 +25,10 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
 import java.io.ByteArrayOutputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
-import java.net.URLConnection;
 import java.util.ArrayList;
-import java.util.concurrent.ExecutionException;
 
 import butterknife.BindView;
 
@@ -48,9 +36,10 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment implements UserRecycleAdapter.MyClickListener{
+public class ChatListFragment extends BaseFragment implements UserRecycleAdapter.MyClickListener, TaskListener{
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
 
+    private boolean isTaskIsRunning = false;
     private String currentUserID;
     private ArrayList<User> usersListData;
     private ArrayList<String> enabledChatUsersData;
@@ -96,56 +85,22 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         }
     };
 
-    public void getUserImageUri(){
-        DatabaseReference ref = database.getReference(Const.USER_INFO).child(currentUserID);
-        ref.addListenerForSingleValueEvent(new ValueListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                DownloadImageTask task = new DownloadImageTask();
-                try {
-                    URL url = new URL(dataSnapshot.getValue(User.class).getImageUrl());
-                    task.execute(url);
-                } catch (MalformedURLException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-    }
-
-    public class DownloadImageTask extends AsyncTask<URL, Void, Bitmap> {
-
+    private ValueListener imageUrlListener = new ValueListener() {
         @Override
-        protected Bitmap doInBackground(URL... params) {
-            URL imageURL = params[0];
-            Bitmap downloadedBitmap = null;
-            try {
-                downloadedBitmap  = BitmapFactory.decodeStream((InputStream)imageURL.getContent());
-            } catch (Exception e) {
-                e.printStackTrace();
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            String link = dataSnapshot.getValue(User.class).getImageUrl();
+            if (link != null){
+                setDataForAsyncTask(link);
             }
-            return downloadedBitmap;
         }
-
-        @Override
-        protected void onPostExecute(Bitmap result) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            myArrayImage = baos.toByteArray();
-        }
-    }
-
+    };
 
     private ChildValueListener chatIDTableListener = new ChildValueListener() {
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-            if (!enabledChatUsersData.contains(dataSnapshot.getKey())){
+            if (dataSnapshot.exists() && !enabledChatUsersData.contains(dataSnapshot.getKey())){
                 enabledChatUsersData.add(dataSnapshot.getKey());
-                for (int i = 0; i < usersListData.size(); i++) {
-                    if (usersListData.get(i).getUserID().equals(dataSnapshot.getKey())){
-                        adapter.notifyItemChanged(i);
-                        break;
-                    }
-                }
+                updateAdapterItems(dataSnapshot.getKey());
             }
         }
 
@@ -155,11 +110,35 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         }
     };
 
+    private void setDataForAsyncTask(String link) {
+        try {
+            URL url = new URL(link);
+            DownloadImageTask task = new DownloadImageTask(ChatListFragment.this);
+            task.execute(url);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateAdapterItems(String data){
+        for (int i = 0; i < usersListData.size(); i++) {
+            if (usersListData.get(i).getUserID().equals(data)){
+                adapter.notifyItemChanged(i);
+                break;
+            }
+        }
+    }
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         innitDataForQuery();
-        getUserImageUri();
+    }
+
+    private void checkUserImage() {
+        if (!isTaskIsRunning && myArrayImage == null){
+            getUserImageUri();
+        }
     }
 
     private void innitDataForQuery() {
@@ -171,12 +150,18 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         chatTableRef = database.getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
 
+    public void getUserImageUri(){
+        database.getReference(Const.USER_INFO).child(currentUserID)
+                .addListenerForSingleValueEvent(imageUrlListener);
+    }
+
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
         bindFragment(this, view);
         layoutManager = new LinearLayoutManager(getActivity());
+        checkUserImage();
         if (savedInstanceState == null){
             innitAdapter();
         }
@@ -189,7 +174,8 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
-
+        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskIsRunning);
+        outState.putByteArray(Const.MY_PHOTO_B_KEY, myArrayImage);
     }
 
     @Override
@@ -198,6 +184,10 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         if (savedInstanceState != null){
             usersListData = savedInstanceState.getParcelableArrayList(Const.USER_LIST_DATA_KEY);
             enabledChatUsersData = savedInstanceState.getStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY);
+            isTaskIsRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
+            if (isTaskIsRunning){
+                myArrayImage = savedInstanceState.getByteArray(Const.MY_PHOTO_B_KEY);
+            }
             layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
             innitAdapter();
         }
@@ -215,12 +205,15 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         chatTableRef.child(userID).addListenerForSingleValueEvent(new ValueListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                ChatListFragment.super.replaceFragments(
-                        ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), myArrayImage, recPhotoArray),
-                        Const.CHAT_FRAG_TAG
-                );
+                setDataForFragment(userID, recPhotoArray, dataSnapshot);
             }
         });
+    }
+
+    private void setDataForFragment(String userID, byte[] recPhotoArray, DataSnapshot dataSnapshot){
+        ChatListFragment.super.replaceFragments(
+                ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), myArrayImage, recPhotoArray),
+                Const.CHAT_FRAG_TAG);
     }
 
     private String checkDataSnapshot(DataSnapshot dataSnapshot, DatabaseReference ref, String receiverID) {
@@ -253,6 +246,51 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         if (query != null && chatTableRef != null){
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
+        }
+    }
+
+    @Override
+    public void onTaskStarted() {
+        isTaskIsRunning = true;
+        System.out.println("task is started ! task is " + isTaskIsRunning);
+    }
+
+    @Override
+    public void onTaskFinished(Bitmap result) {
+        isTaskIsRunning = false;
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+        myArrayImage = baos.toByteArray();
+        System.out.println("task is finish ! task is " + isTaskIsRunning);
+    }
+
+    public class DownloadImageTask extends AsyncTask<URL, Void, Bitmap> {
+        private TaskListener taskListener;
+
+        public DownloadImageTask(TaskListener taskListener) {
+            this.taskListener = taskListener;
+        }
+
+        @Override
+        protected void onPreExecute() {
+            taskListener.onTaskStarted();
+        }
+
+        @Override
+        protected Bitmap doInBackground(URL... params) {
+            URL imageURL = params[0];
+            Bitmap downloadedBitmap = null;
+            try {
+                downloadedBitmap  = BitmapFactory.decodeStream((InputStream)imageURL.getContent());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            return downloadedBitmap;
+        }
+
+        @Override
+        protected void onPostExecute(Bitmap result) {
+            taskListener.onTaskFinished(result);
         }
     }
 }

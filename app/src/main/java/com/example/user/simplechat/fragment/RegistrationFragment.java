@@ -177,7 +177,10 @@ public class RegistrationFragment extends BaseFragment {
         Map<String, Object> userInfoMap = new HashMap<>();
         userInfoMap.put(user.getUserID(), user);
         FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
+        innitFragment();
+    }
 
+    private void innitFragment() {
         onTaskFinished();
         isTaskRunning = false;
         super.removeFragmentFromBackStack();
@@ -186,13 +189,17 @@ public class RegistrationFragment extends BaseFragment {
 
     private void updateStoragePhoto(Uri photoUri) {
         if (photoUri != null){
-            FirebaseStorage fs = FirebaseStorage.getInstance();
-            StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
-            UploadTask uTask = sr.putBytes(setByteArrayFromImage(userImage));
-            uTask.addOnFailureListener(failureListener);
-            uTask.addOnSuccessListener(addPhotoSuccessListener);
+            setTasks();
             return;
         }
         saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
+    }
+
+    private void setTasks() {
+        FirebaseStorage fs = FirebaseStorage.getInstance();
+        StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
+        UploadTask uTask = sr.putBytes(super.setByteArrayFromImage(userImage));
+        uTask.addOnFailureListener(failureListener);
+        uTask.addOnSuccessListener(addPhotoSuccessListener);
     }
 }

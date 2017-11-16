@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.model.Message;
+import com.example.user.simplechat.utils.Const;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,8 +24,6 @@ import de.hdodenhof.circleimageview.CircleImageView;
  */
 
 public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.ChatViewHolder>{
-    private final int VIEW_TYPE_LEFT = 0;
-    private final int VIEW_TYPE_RIGHT = 1;
     private ArrayList<Message> messageArray;
     private String currentID;
     private Bitmap myPhoto;
@@ -53,9 +52,9 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
     public int getItemViewType(int position) {
         int viewType;
         if (messageArray.get(position).getAuthorID().equals(currentID)){
-            viewType = VIEW_TYPE_LEFT;
+            viewType = Const.VIEW_TYPE_LEFT;
         }else {
-            viewType = VIEW_TYPE_RIGHT;
+            viewType = Const.VIEW_TYPE_RIGHT;
         }
         return viewType;
     }
@@ -65,7 +64,7 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         getItemViewType(position);
         holder.senderMessageView.setText(messageArray.get(position).getMessageText());
         holder.messageTimeView.setText(formatTime(messageArray.get(position).getMessageTime()));
-        holder.userPhotoView.setImageBitmap(checkBitmapForUser(currentID, messageArray.get(position).getAuthorID()));
+        checkBitmapForUser(currentID, messageArray.get(position).getAuthorID(), holder.userPhotoView);
     }
 
     private String formatTime(long time) {
@@ -77,11 +76,13 @@ public class ChatRecycleAdapter extends RecyclerView.Adapter<ChatRecycleAdapter.
         return messageArray == null ? 0 : messageArray.size();
     }
 
-    private Bitmap checkBitmapForUser(String currentID, String userID){
-        if (!currentID.equals(userID)){
-            return receiverPhoto;
+    private void checkBitmapForUser(String currentID, String userID, CircleImageView imageView){
+        if (currentID.equals(userID) && myPhoto != null){
+            imageView.setImageBitmap(myPhoto);
         }
-        return myPhoto;
+        if (receiverPhoto != null && !currentID.equals(userID)){
+            imageView.setImageBitmap(receiverPhoto);
+        }
     }
 
     public static class ChatViewHolder extends RecyclerView.ViewHolder{

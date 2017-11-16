@@ -78,7 +78,19 @@ public class ChatFragment extends BaseFragment{
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         innitDataForQuery();
+        innitPhotoArrays();
         messageQuery = database.getReference(Const.CHAT_ARCHIVE).child(chatID).limitToLast(25);
+    }
+
+    private void innitPhotoArrays() {
+        byte[] myPhotoArray = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
+        if (myPhotoArray != null){
+            myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
+        }
+        byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);
+        if (receiverPhotoArray != null){
+            receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
+        }
     }
 
     private void innitDataForQuery() {
@@ -86,14 +98,6 @@ public class ChatFragment extends BaseFragment{
         database = FirebaseDatabase.getInstance();
         currentID = FirebaseAuth.getInstance().getUid();
         chatID = getArguments().getString(Const.CHAT_ID);
-
-        byte[] myPhotoArray = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
-        byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);
-
-        if (myPhotoArray != null|| receiverPhotoArray != null){
-            receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
-            myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
-        }
     }
 
     @Nullable
@@ -101,7 +105,6 @@ public class ChatFragment extends BaseFragment{
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.chat_fragment, container, false);
         bindFragment(this, view);
-
         layoutManager = new LinearLayoutManager(getContext());
         if (savedInstanceState == null) innitAdapter();
         return view;
@@ -149,12 +152,16 @@ public class ChatFragment extends BaseFragment{
     @OnClick(R.id.sendMassageBtn)
     public void setMessage(){
         if (messageEditText.length() != 0){
-            Map<String, Object> mapMessage = new HashMap<>();
-            chatArchiveRef = database.getReference(Const.CHAT_ARCHIVE).child(chatID);
-            mapMessage.put(chatArchiveRef.push().getKey(), setMessageData());
-            chatArchiveRef.updateChildren(mapMessage);
-            messageEditText.setText(null);
+            sendMessage();
         }
+    }
+
+    private void sendMessage() {
+        Map<String, Object> mapMessage = new HashMap<>();
+        chatArchiveRef = database.getReference(Const.CHAT_ARCHIVE).child(chatID);
+        mapMessage.put(chatArchiveRef.push().getKey(), setMessageData());
+        chatArchiveRef.updateChildren(mapMessage);
+        messageEditText.setText(null);
     }
 
     public Message setMessageData() {
