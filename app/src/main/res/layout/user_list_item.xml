@@ -34,11 +34,11 @@
         android:text="no data"
         android:layout_alignParentRight="true" />
 
-    <ImageView
+    <de.hdodenhof.circleimageview.CircleImageView
         android:id="@+id/onlineStatus"
         android:layout_width="20dp"
         android:layout_height="20dp"
-        android:layout_marginRight="6dp"
-        android:layout_marginLeft="16dp"
-        android:layout_toRightOf="@id/itemUserName" />
+        android:layout_marginTop="6dp"
+        android:layout_marginLeft="40dp"
+        android:layout_alignBottom="@id/itemUserImage" />
 </RelativeLayout>

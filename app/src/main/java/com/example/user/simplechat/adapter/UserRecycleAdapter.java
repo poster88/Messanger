@@ -6,7 +6,6 @@ import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
@@ -76,10 +75,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     private int setImageStatus(boolean isOnline) {
-        if (isOnline) {
-            return R.drawable.ic_is_online_24dp;
-        }
-        return R.drawable.ic_is_offline_24dp;
+        return isOnline ? R.drawable.ic_is_online_24dp : R.drawable.ic_is_offline_24dp;
     }
 
     @Override
@@ -137,7 +133,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
         @BindView(R.id.chatStatus) TextView chatStatus;
-        @BindView(R.id.onlineStatus) ImageView onlineStatus;
+        @BindView(R.id.onlineStatus) CircleImageView onlineStatus;
 
         public UserViewHolder(View itemView) {
             super(itemView);

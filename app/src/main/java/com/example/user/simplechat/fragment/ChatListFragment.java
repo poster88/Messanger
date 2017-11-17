@@ -5,6 +5,7 @@ import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
+import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
@@ -198,6 +199,11 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         adapter.setMyClickListener(ChatListFragment.this);
         usersRecView.setLayoutManager(layoutManager);
         usersRecView.setAdapter(adapter);
+        usersRecView.addItemDecoration(setItemDecoration());
+    }
+
+    private DividerItemDecoration setItemDecoration() {
+        return new DividerItemDecoration(usersRecView.getContext(), layoutManager.getOrientation());
     }
 
     @Override

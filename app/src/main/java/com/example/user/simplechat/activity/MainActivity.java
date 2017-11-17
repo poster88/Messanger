@@ -100,6 +100,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        System.out.println("onresume");
+    }
+
+    @Override
     protected void onStop() {
         super.onStop();
         setIsOffline();
