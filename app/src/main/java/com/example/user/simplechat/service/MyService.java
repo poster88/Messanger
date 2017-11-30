@@ -4,6 +4,9 @@ import android.app.Service;
 import android.content.Intent;
 import android.os.IBinder;
 
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class MyService extends Service {
     public MyService() {
     }
@@ -15,6 +18,14 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        String link = intent.getStringExtra("link");
+        URL imageUrl;
+        try {
+            imageUrl = new URL(link);
+        } catch (MalformedURLException e) {
+            e.printStackTrace();
+        }
+
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -23,23 +34,16 @@ public class MyService extends Service {
         super.onCreate();
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-    }
+    private class DownloadImageTask implements Runnable{
+        private URL imageUrl;
 
-    @Override
-    public boolean onUnbind(Intent intent) {
-        return super.onUnbind(intent);
-    }
+        public DownloadImageTask(URL imageUrl) {
+            this.imageUrl = imageUrl;
+        }
 
-    @Override
-    public void onRebind(Intent intent) {
-        super.onRebind(intent);
-    }
+        @Override
+        public void run() {
 
-    @Override
-    public void onTaskRemoved(Intent rootIntent) {
-        super.onTaskRemoved(rootIntent);
+        }
     }
 }
