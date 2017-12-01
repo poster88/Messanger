@@ -7,13 +7,16 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.service.MyService;
+import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
 
 
 public class MainActivity extends AppCompatActivity {
@@ -53,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
             ft.add(R.id.container, LoginFragment.newInstance());
             ft.commit();
         }
+        Log.d(Const.MY_LOG, "onCreate");
     }
 
     private void innitVariables() {
@@ -66,6 +70,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra(MyService.CURRENT_ID_KEY, currentID);
         intent.putExtra(MyService.ONLINE_STATUS_KEY, isOnline);
         startService(intent);
+        Log.d(Const.MY_LOG, "startMyService : isOnline = " + isOnline);
     }
 
     @Override
@@ -84,20 +89,47 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         auth.addAuthStateListener(authStateListener);
+        Log.d(Const.MY_LOG, "onStart");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(Const.MY_LOG, "onResume");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        if (auth.getCurrentUser() != null){
+            isOnline = false;
+            currentID = auth.getUid();
+            startMyService();
+            currentID = null;
+        }
+        auth.removeAuthStateListener(authStateListener);
+        Log.d(Const.MY_LOG, "onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        if (auth.getCurrentUser() != null){
-            isOnline = false;
-            currentID = auth.getUid();
-            startMyService();
-        }
-        auth.removeAuthStateListener(authStateListener);
+        Log.d(Const.MY_LOG, "onStop");
     }
 
     public FragmentManager getFm() {
         return fm;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(Const.MY_LOG, "onDestroy");
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        Log.d(Const.MY_LOG, "onRestart");
     }
 }

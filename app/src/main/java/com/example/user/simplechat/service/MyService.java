@@ -26,31 +26,30 @@ public class MyService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.d("MY_TAG", "onStartCommand");
+        Log.d(Const.MY_LOG, "onCreate Service");
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d("MY_TAG", "onStartCommand");
-
         if (intent.getAction().equals(UPDATE_ONLINE_STATUS)){
             String currentID = intent.getStringExtra(CURRENT_ID_KEY);
             boolean isOnline = intent.getBooleanExtra(ONLINE_STATUS_KEY, false);
+            Log.d(Const.MY_LOG, "onStartCommand, startId = " + startId + " status isOnline = " + isOnline + " flag = " + flags);
             ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, currentID, isOnline);
             task.run();
         }
-        return START_NOT_STICKY;
+        return START_STICKY;
     }
 
     @Override
     public void onTaskRemoved(Intent rootIntent) {
-        Log.d("MY_TAG", "onTaskRemoved");
+        Log.d(Const.MY_LOG, "onTaskRemoved");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d("MY_TAG", "onDestroy service");
+        Log.d(Const.MY_LOG, "onDestroy service");
     }
 
     private class ChangeOnlineStatusUser implements Runnable{
@@ -88,6 +87,7 @@ public class MyService extends Service {
 
         private void stop(){
             stopSelf(startId);
+            Log.d(Const.MY_LOG, "stop run with task = " + startId + " isOnline = " + isOnline);
         }
     }
 }

@@ -39,4 +39,6 @@ public final class Const {
     public static final int RESULT_OK = -1;
     public static final int VIEW_TYPE_LEFT = 0;
     public static final int VIEW_TYPE_RIGHT = 1;
+
+    public static final String MY_LOG = "MY_LOG";
 }
