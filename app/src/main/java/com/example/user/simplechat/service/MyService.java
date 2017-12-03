@@ -14,9 +14,7 @@ import com.google.firebase.database.FirebaseDatabase;
 
 
 public class MyService extends Service {
-    public static String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
-    public static String CURRENT_ID_KEY = "CURRENT_ID_KEY";
-    public static String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
+
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -31,12 +29,13 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(UPDATE_ONLINE_STATUS)){
-            String currentID = intent.getStringExtra(CURRENT_ID_KEY);
-            boolean isOnline = intent.getBooleanExtra(ONLINE_STATUS_KEY, false);
-            Log.d(Const.MY_LOG, "onStartCommand, startId = " + startId + " status isOnline = " + isOnline + " flag = " + flags);
-            ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, currentID, isOnline);
-            task.run();
+        String action = intent.getAction();
+        if (action != null){
+            if (action.equals(Const.UPDATE_ONLINE_STATUS)){
+                Log.d(Const.MY_LOG, "onStartCommand : UPDATE_ONLINE_STATUS");
+                ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
+                task.run();
+            }
         }
         return START_STICKY;
     }
@@ -56,33 +55,37 @@ public class MyService extends Service {
         private FirebaseDatabase database;
         private DatabaseReference ref;
         private User currentUser;
-        private String currentID;
+        private Intent intent;
         private int startId;
+        private String currentID;
         private boolean isOnline;
 
-        private ChangeOnlineStatusUser(int startId, String currentID, boolean isOnline){
-            this.startId = startId;
-            this.currentID = currentID;
-            this.isOnline = isOnline;
-        }
+        private ValueListener updateChildrenListener = new ValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                currentUser = dataSnapshot.getValue(User.class);
+                currentUser.setOnline(isOnline);
+                database.getReference(Const.CHAT_USER_INFO).updateChildren(currentUser.toMap());
+                stop();
+            }
+        };
 
-        private void innitDB(){
-            database = FirebaseDatabase.getInstance();
-            ref = database.getReference(Const.CHAT_USER_INFO).child(currentID);
+        private ChangeOnlineStatusUser(int startId, Intent intent){
+            this.startId = startId;
+            this.intent = intent;
         }
 
         @Override
         public void run() {
-            innitDB();
-            ref.addListenerForSingleValueEvent(new ValueListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    currentUser = dataSnapshot.getValue(User.class);
-                    currentUser.setOnline(isOnline);
-                    database.getReference(Const.CHAT_USER_INFO).updateChildren(currentUser.toMap());
-                    stop();
-                }
-            });
+            innitData();
+            ref.addListenerForSingleValueEvent(updateChildrenListener);
+        }
+
+        private void innitData(){
+            currentID = intent.getStringExtra(Const.CURRENT_ID_KEY);
+            isOnline = intent.getBooleanExtra(Const.ONLINE_STATUS_KEY, false);
+            database = FirebaseDatabase.getInstance();
+            ref = database.getReference(Const.CHAT_USER_INFO).child(currentID);
         }
 
         private void stop(){

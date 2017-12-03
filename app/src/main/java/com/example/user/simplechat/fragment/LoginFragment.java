@@ -1,5 +1,6 @@
 package com.example.user.simplechat.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -88,6 +89,7 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
         isTaskRunning = false;
         if (task.isSuccessful()){
             showChatListFragment(auth.getCurrentUser());
+            getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
             return;
         }
         Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
