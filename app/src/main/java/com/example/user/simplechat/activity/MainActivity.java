@@ -38,6 +38,9 @@ public class MainActivity extends AppCompatActivity {
         if (intent.getAction().equals(Const.USER_ONLINE)){
             isOnline = true;
         }
+        if (intent.getAction().equals(Const.USER_OFFLINE)){
+            isOnline = false;
+        }
         if (intent.getAction().equals(Const.USER_LOG_OFF)){
             auth.signOut();
         }
@@ -114,5 +117,9 @@ public class MainActivity extends AppCompatActivity {
 
     public FragmentManager getFm() {
         return fm;
+    }
+
+    public FirebaseAuth getAuth() {
+        return auth;
     }
 }
