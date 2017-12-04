@@ -1,8 +1,10 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
-import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Build;
@@ -10,7 +12,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,9 +26,6 @@ import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -48,30 +46,43 @@ public class RegistrationFragment extends BaseFragment {
 
     private Uri photoUri;
     private boolean isDialogRunning;
-
-    public static RegistrationFragment newInstance(){
-        return new RegistrationFragment();
-    }
-
+    private BroadcastReceiver br = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String result = intent.getStringExtra(Const.UPLOAD_STATUS_KEY);
+            if (result.equals(Const.UPLOAD_STATUS_OK)){
+                showChatList(intent.getStringExtra(Const.UPLOAD_IMAGE_URL));
+                getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
+            }
+            if (result.equals(Const.UPLOAD_STATUS_FAIL)){
+                showErrorMessage(intent.getStringExtra(Const.UPLOAD_MESSAGE_KEY));
+            }
+        }
+    };
     private OnSuccessListener regSuccessListener = new OnSuccessListener() {
         @Override
         public void onSuccess(Object o) {
-            Intent serviceIntent = new Intent(getContext(), MyService.class);
-            PendingIntent pi = getActivity().createPendingResult(Const.UPLOAD_TASK_CODE, serviceIntent, 0);
-            serviceIntent.setAction(Const.UPLOAD_TASK);
-            serviceIntent.setData(photoUri);
-            serviceIntent.putExtra(Const.PARAM_PINTENT, pi);
-            serviceIntent.putExtra(Const.BYTE_IMAGE_KEY, RegistrationFragment.super.setByteArrayFromImage(userImage));
-            getActivity().startService(serviceIntent);
+            sendServiceIntent();
         }
     };
-
     private OnFailureListener failureListener = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception e) {
             showErrorMessage("Exception : " + e.getMessage());
         }
     };
+
+    public static RegistrationFragment newInstance(){
+        return new RegistrationFragment();
+    }
+
+    private void sendServiceIntent(){
+        Intent serviceIntent = new Intent(getContext(), MyService.class);
+        serviceIntent.setAction(Const.UPLOAD_IMAGE_TASK);
+        serviceIntent.setData(photoUri);
+        serviceIntent.putExtra(Const.BYTE_IMAGE_KEY, RegistrationFragment.super.setByteArrayFromImage(userImage));
+        getActivity().startService(serviceIntent);
+    }
 
     private void showErrorMessage(String message) {
         isDialogRunning(false);
@@ -81,6 +92,9 @@ public class RegistrationFragment extends BaseFragment {
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Const.UPLOAD_IMAGE_ACTION);
+        getActivity().registerReceiver(br, filter);
     }
 
     @Nullable
@@ -145,17 +159,6 @@ public class RegistrationFragment extends BaseFragment {
                 checkPhotoUri(data.getData());
             }
         }
-        if (requestCode == Const.UPLOAD_TASK_CODE){
-            if (resultCode == Const.UPLOAD_STATUS_OK){
-                Log.d(Const.MY_LOG, "image downloaded");
-                //check imageUri
-                showChatList(data.getStringExtra(Const.UPLOAD_IMAGE_URL));
-            }
-            if (resultCode == Const.UPLOAD_STATUS_FAIL){
-                Log.d(Const.MY_LOG, "image download failed");
-                showErrorMessage(data.getStringExtra(Const.UPLOAD_MESSAGE_KEY));
-            }
-        }
     }
 
     @OnClick(R.id.regCancelBtn)
@@ -175,7 +178,6 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     private void isDialogRunning(boolean flag){
-        /*
         isDialogRunning = flag;
         if (!flag){
             super.dialogFinished();
@@ -183,7 +185,6 @@ public class RegistrationFragment extends BaseFragment {
         }
         super.dialogStarted(getActivity(), "Registration", "Please wait a moment!",
                 true, false, null, null, null, null);
-                */
     }
 
     private void saveUserDataInDB(User user, String photoUrl){
@@ -201,5 +202,11 @@ public class RegistrationFragment extends BaseFragment {
         isDialogRunning(false);
         super.removeFragmentFromBackStack();
         super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(br);
     }
 }

@@ -1,6 +1,5 @@
 package com.example.user.simplechat.service;
 
-import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.net.Uri;
@@ -8,7 +7,6 @@ import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.util.Log;
 
-import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
@@ -44,7 +42,7 @@ public class MyService extends Service {
                 ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
                 task.run();
             }
-            if (action.equals(Const.UPLOAD_TASK)){
+            if (action.equals(Const.UPLOAD_IMAGE_TASK)){
                 Log.d(Const.MY_LOG, "onStartCommand : uploadTask");
                 UploadImageTask task = new UploadImageTask(startId, intent);
                 task.run();
@@ -111,7 +109,6 @@ public class MyService extends Service {
         private int startId;
         private byte[] userImage;
         private Uri photoUri;
-        private PendingIntent pi;
         private Intent intent;
 
         private UploadImageTask(int startId, Intent intent) {
@@ -151,19 +148,19 @@ public class MyService extends Service {
         private void innitDataFromIntent() {
             photoUri = intent.getData();
             userImage = intent.getByteArrayExtra(Const.BYTE_IMAGE_KEY);
-            pi = intent.getParcelableExtra(Const.PARAM_PINTENT);
         }
 
-        private void stop(int uploadStatus, String imageUrl, String exceptionMessage){
+        private void stop(String uploadStatus, String imageUrl, String exceptionMessage){
             try {
-                Intent intent = new Intent(MyService.this, MainActivity.class);
+                Intent intent = new Intent(Const.UPLOAD_IMAGE_ACTION);
+                intent.putExtra(Const.UPLOAD_STATUS_KEY, uploadStatus);
                 intent.putExtra(Const.UPLOAD_IMAGE_URL, imageUrl);
                 intent.putExtra(Const.UPLOAD_MESSAGE_KEY, exceptionMessage);
-                pi.send(MyService.this, uploadStatus, intent);
-            }catch (PendingIntent.CanceledException e){
-                e.printStackTrace();
-            }finally {
+                sendBroadcast(intent);
+            } finally {
                 stopSelf(startId);
+                Log.d(Const.MY_LOG, "stop run UploadImageTask / uploadStatus = " + uploadStatus +
+                        " imageUrl = " + imageUrl + " exceptionMessage = " + exceptionMessage);
             }
         }
     }

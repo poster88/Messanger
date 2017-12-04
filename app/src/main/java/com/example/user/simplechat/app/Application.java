@@ -1,5 +1,9 @@
 package com.example.user.simplechat.app;
 
+import android.content.Intent;
+
+import com.example.user.simplechat.service.MyService;
+import com.example.user.simplechat.service.MySystemService;
 import com.google.firebase.database.FirebaseDatabase;
 
 /**
@@ -11,5 +15,6 @@ public class Application extends android.app.Application{
     public void onCreate() {
         super.onCreate();
         FirebaseDatabase.getInstance().setPersistenceEnabled(true);
+        startService(new Intent(this, MyService.class));
     }
 }

@@ -40,14 +40,13 @@ public final class Const {
     public static final int VIEW_TYPE_LEFT = 0;
     public static final int VIEW_TYPE_RIGHT = 1;
 
-    public static final int UPLOAD_TASK_CODE = 100;
-    public static final int UPLOAD_STATUS_OK = 101;
-    public static final int UPLOAD_STATUS_FAIL = 102;
-
     //keys for uploadImageTask
     public static final String UPLOAD_MESSAGE_KEY = "UPLOAD_MESSAGE_KEY";
+    public static final String UPLOAD_STATUS_KEY = "UPLOAD_STATUS_KEY";
     public static final String UPLOAD_IMAGE_URL = "UPLOAD_IMAGE_URL";
-    public static final String PARAM_PINTENT = "PARAM_PINTENT";
+    public static final String UPLOAD_IMAGE_ACTION = "UPLOAD_IMAGE_ACTION";
+    public static final String UPLOAD_STATUS_OK = "UPLOAD_STATUS_OK";
+    public static final String UPLOAD_STATUS_FAIL = "UPLOAD_STATUS_FAIL";
 
     //keys for broadcastReceiver actions
     public static final String USER_ONLINE = "USER_ONLINE";
@@ -56,7 +55,7 @@ public final class Const {
 
     //keys for service
     public static final String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
-    public static final String UPLOAD_TASK = "UPLOAD_TASK";
+    public static final String UPLOAD_IMAGE_TASK = "UPLOAD_IMAGE_TASK";
     public static final String CURRENT_ID_KEY = "CURRENT_ID_KEY";
     public static final String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
     public static final String BYTE_IMAGE_KEY = "BYTE_IMAGE_KEY";

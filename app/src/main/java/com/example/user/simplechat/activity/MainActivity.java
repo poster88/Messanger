@@ -21,7 +21,6 @@ import com.google.firebase.auth.FirebaseAuth;
 public class MainActivity extends AppCompatActivity {
     private FragmentManager fm = getSupportFragmentManager();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
-
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
