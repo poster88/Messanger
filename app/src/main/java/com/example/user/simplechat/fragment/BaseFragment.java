@@ -47,6 +47,7 @@ public class BaseFragment extends Fragment {
     public byte[] setByteArrayFromImage(CircleImageView userImage){
         userImage.setDrawingCacheEnabled(true);
         userImage.buildDrawingCache();
+
         Bitmap bitmap = userImage.getDrawingCache();
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
@@ -64,7 +65,7 @@ public class BaseFragment extends Fragment {
         ((MainActivity) getActivity()).getFm().popBackStack();
     }
 
-    public void onTaskStarted(
+    public void dialogStarted(
             Activity activity, String title, String message, boolean isIndeterminate, boolean isCancelable,
             DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
             DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel
@@ -79,7 +80,7 @@ public class BaseFragment extends Fragment {
         progressDialog.show();
     }
 
-    public void onTaskFinished() {
+    public void dialogFinished() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
         }

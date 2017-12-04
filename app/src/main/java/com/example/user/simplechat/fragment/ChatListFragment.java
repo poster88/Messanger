@@ -175,7 +175,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
-        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskIsRunning);
+        outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isTaskIsRunning);
         outState.putByteArray(Const.MY_PHOTO_B_KEY, myArrayImage);
     }
 
@@ -185,7 +185,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         if (savedInstanceState != null){
             usersListData = savedInstanceState.getParcelableArrayList(Const.USER_LIST_DATA_KEY);
             enabledChatUsersData = savedInstanceState.getStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY);
-            isTaskIsRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
+            isTaskIsRunning = savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY);
             if (isTaskIsRunning){
                 myArrayImage = savedInstanceState.getByteArray(Const.MY_PHOTO_B_KEY);
             }

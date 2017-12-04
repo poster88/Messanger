@@ -1,20 +1,20 @@
 package com.example.user.simplechat.fragment;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import butterknife.BindView;
@@ -24,22 +24,34 @@ import butterknife.OnClick;
  * Created by User on 011 11.10.17.
  */
 
-public class LoginFragment extends BaseFragment implements OnCompleteListener {
+public class LoginFragment extends BaseFragment {
     @BindView(R.id.userLoginEdit) EditText userLoginET;
     @BindView(R.id.userPasswordEdit) EditText userPasswordET;
 
-    private FirebaseAuth auth = FirebaseAuth.getInstance();
-    private boolean isTaskRunning;
+    private boolean isDialogRunning;
 
     public static LoginFragment newInstance(){
         return new LoginFragment();
     }
 
+    private OnCompleteListener loginTaskListener = new OnCompleteListener() {
+        @Override
+        public void onComplete(@NonNull Task task) {
+            isDialogRunning(false);
+            if (task.isSuccessful()){
+                showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
+                getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
+                return;
+            }
+            Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+        }
+    };
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null){
-            showChatListFragment(auth.getCurrentUser());
+            showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
         }
     }
 
@@ -51,57 +63,46 @@ public class LoginFragment extends BaseFragment implements OnCompleteListener {
         return view;
     }
 
-    @OnClick({R.id.loginBtn, R.id.registrationBtn})
-    public void loginAction(Button button){
-        if (button.getId() == R.id.registrationBtn){
-            super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
-            return;
+    @OnClick(R.id.loginBtn)
+    public void loginAction(){
+        if (fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
+            isDialogRunning(true);
+            ((MainActivity)getActivity()).getAuth()
+                    .signInWithEmailAndPassword(userLoginET.getText().toString(), userPasswordET.getText().toString())
+                    .addOnCompleteListener(loginTaskListener);
         }
-        if(fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
-            isTaskRunning = true;
-            setTaskRunning();
-            auth.signInWithEmailAndPassword(userLoginET.getText().toString(), userPasswordET.getText().toString())
-                    .addOnCompleteListener(LoginFragment.this);
-        }
+    }
+
+    @OnClick(R.id.registrationBtn)
+    public void regAction(){
+        super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
-        }
-        if (isTaskRunning){
-            setTaskRunning();
+            isDialogRunning(savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY, false));
         }
     }
 
-    private void setTaskRunning(){
-        super.onTaskStarted(getActivity(),  "Login", "Please wait a moment!",
-                true, false, null, null,
-                null, null);
-    }
-
-    @Override
-    public void onComplete(@NonNull Task task) {
-        super.onTaskFinished();
-        isTaskRunning = false;
-        if (task.isSuccessful()){
-            showChatListFragment(auth.getCurrentUser());
+    private void isDialogRunning(boolean flag){
+        isDialogRunning = flag;
+        if (!flag){
+            super.dialogFinished();
             return;
         }
-        Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+        super.dialogStarted(getActivity(),  "Login", "Please wait a moment!",
+                true, false, null, null, null, null);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
+        outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isDialogRunning);
     }
 
-    private void showChatListFragment(FirebaseUser user) {
-        if (user != null){
-            LoginFragment.super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
-        }
+    private void showChatList(FirebaseUser user) {
+        if (user != null)super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }
 }

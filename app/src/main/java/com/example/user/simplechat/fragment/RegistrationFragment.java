@@ -1,6 +1,7 @@
 package com.example.user.simplechat.fragment;
 
 import android.Manifest;
+import android.app.PendingIntent;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
@@ -9,19 +10,20 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.model.User;
+import com.example.user.simplechat.service.MyService;
 import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -45,7 +47,7 @@ public class RegistrationFragment extends BaseFragment {
     @BindView(R.id.regPassEdit) EditText userPass;
 
     private Uri photoUri;
-    private boolean isTaskRunning;
+    private boolean isDialogRunning;
 
     public static RegistrationFragment newInstance(){
         return new RegistrationFragment();
@@ -54,26 +56,32 @@ public class RegistrationFragment extends BaseFragment {
     private OnSuccessListener regSuccessListener = new OnSuccessListener() {
         @Override
         public void onSuccess(Object o) {
-            updateStoragePhoto(photoUri);
-        }
-    };
-
-    private OnSuccessListener<UploadTask.TaskSnapshot> addPhotoSuccessListener = new OnSuccessListener<UploadTask.TaskSnapshot>() {
-        @Override
-        public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-            @SuppressWarnings("VisibleForTests") String getDownloadUrl = taskSnapshot.getDownloadUrl().toString();
-            saveUserInRealTimeDB(new User(), getDownloadUrl);
+            Intent serviceIntent = new Intent(getContext(), MyService.class);
+            PendingIntent pi = getActivity().createPendingResult(Const.UPLOAD_TASK_CODE, serviceIntent, 0);
+            serviceIntent.setAction(Const.UPLOAD_TASK);
+            serviceIntent.setData(photoUri);
+            serviceIntent.putExtra(Const.PARAM_PINTENT, pi);
+            serviceIntent.putExtra(Const.BYTE_IMAGE_KEY, RegistrationFragment.super.setByteArrayFromImage(userImage));
+            getActivity().startService(serviceIntent);
         }
     };
 
     private OnFailureListener failureListener = new OnFailureListener() {
         @Override
         public void onFailure(@NonNull Exception e) {
-            Toast.makeText(getContext(), "Exception: " + e.getMessage(), Toast.LENGTH_SHORT).show();
-            onTaskFinished();
-            isTaskRunning = false;
+            showErrorMessage("Exception : " + e.getMessage());
         }
     };
+
+    private void showErrorMessage(String message) {
+        isDialogRunning(false);
+        Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+    }
 
     @Nullable
     @Override
@@ -84,33 +92,24 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     @Override
-    public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        if (savedInstanceState != null && photoUri != null){
-            super.setImageToView(photoUri, userImage);
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        if (savedInstanceState != null){
+            isDialogRunning(savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY));
+            checkPhotoUri((Uri) savedInstanceState.getParcelable(Const.USER_IMAGE_KEY));
         }
+    }
+
+    private void checkPhotoUri(Uri uri){
+        photoUri = uri;
+        if (photoUri != null) super.setImageToView(photoUri, userImage);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(Const.IS_TASK_RUNNING_KEY, isTaskRunning);
+        outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isDialogRunning);
         outState.putParcelable(Const.USER_IMAGE_KEY, photoUri);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null){
-            isTaskRunning = savedInstanceState.getBoolean(Const.IS_TASK_RUNNING_KEY);
-            photoUri = savedInstanceState.getParcelable(Const.USER_IMAGE_KEY);
-            if (photoUri != null){
-                super.setImageToView(photoUri, userImage);
-            }
-        }
-        if (isTaskRunning){
-            setRegistrationTask();
-        }
     }
 
     @OnClick(R.id.setImageBtn)
@@ -143,63 +142,64 @@ public class RegistrationFragment extends BaseFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == Const.PHOTO_REQUEST){
             if (resultCode == Const.RESULT_OK){
-                photoUri = data.getData();
-                super.setImageToView(photoUri, userImage);
+                checkPhotoUri(data.getData());
+            }
+        }
+        if (requestCode == Const.UPLOAD_TASK_CODE){
+            if (resultCode == Const.UPLOAD_STATUS_OK){
+                Log.d(Const.MY_LOG, "image downloaded");
+                //check imageUri
+                showChatList(data.getStringExtra(Const.UPLOAD_IMAGE_URL));
+            }
+            if (resultCode == Const.UPLOAD_STATUS_FAIL){
+                Log.d(Const.MY_LOG, "image download failed");
+                showErrorMessage(data.getStringExtra(Const.UPLOAD_MESSAGE_KEY));
             }
         }
     }
 
-    @OnClick({R.id.regOkBtn, R.id.regCancelBtn})
-    public void buttonAction(Button button){
-        if (button.getId() == R.id.regCancelBtn){
-            super.removeFragmentFromBackStack();
-            return;
-        }
+    @OnClick(R.id.regCancelBtn)
+    public void cancelBtnClick(){
+        super.removeFragmentFromBackStack();
+    }
+
+    @OnClick(R.id.regOkBtn)
+    public void okBtnClick(){
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
-            isTaskRunning = true;
-            setRegistrationTask();
-            FirebaseAuth.getInstance().createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
+            isDialogRunning(true);
+            ((MainActivity) getActivity()).getAuth()
+                    .createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
                     .addOnFailureListener(failureListener);
         }
     }
 
-    private void setRegistrationTask(){
-        super.onTaskStarted(getActivity(), "Registration", "Please wait a moment!",
+    private void isDialogRunning(boolean flag){
+        /*
+        isDialogRunning = flag;
+        if (!flag){
+            super.dialogFinished();
+            return;
+        }
+        super.dialogStarted(getActivity(), "Registration", "Please wait a moment!",
                 true, false, null, null, null, null);
+                */
     }
 
-    private void saveUserInRealTimeDB(User user, String downloadUrl){
-        user.setUserID(FirebaseAuth.getInstance().getCurrentUser().getUid());
+    private void saveUserDataInDB(User user, String photoUrl){
+        user.setUserID(((MainActivity) getActivity()).getAuth().getUid());
         user.setUserName(userName.getText().toString());
         user.setUserEmail(userEmail.getText().toString());
-        user.setImageUrl(downloadUrl);
+        user.setImageUrl(photoUrl);
         Map<String, Object> userInfoMap = new HashMap<>();
         userInfoMap.put(user.getUserID(), user);
         FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
-        innitFragment();
     }
 
-    private void innitFragment() {
-        onTaskFinished();
-        isTaskRunning = false;
+    private void showChatList(String photoUrl) {
+        saveUserDataInDB(new User(), photoUrl);
+        isDialogRunning(false);
         super.removeFragmentFromBackStack();
         super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
-    }
-
-    private void updateStoragePhoto(Uri photoUri) {
-        if (photoUri != null){
-            setTasks();
-            return;
-        }
-        saveUserInRealTimeDB(new User(), Const.PHOTO_DEFAULT);
-    }
-
-    private void setTasks() {
-        FirebaseStorage fs = FirebaseStorage.getInstance();
-        StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
-        UploadTask uTask = sr.putBytes(super.setByteArrayFromImage(userImage));
-        uTask.addOnFailureListener(failureListener);
-        uTask.addOnSuccessListener(addPhotoSuccessListener);
     }
 }

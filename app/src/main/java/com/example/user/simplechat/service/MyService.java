@@ -1,22 +1,28 @@
 package com.example.user.simplechat.service;
 
+import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.IBinder;
+import android.support.annotation.NonNull;
 import android.util.Log;
 
+import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 
 public class MyService extends Service {
-    public static String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
-    public static String CURRENT_ID_KEY = "CURRENT_ID_KEY";
-    public static String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -31,12 +37,18 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent.getAction().equals(UPDATE_ONLINE_STATUS)){
-            String currentID = intent.getStringExtra(CURRENT_ID_KEY);
-            boolean isOnline = intent.getBooleanExtra(ONLINE_STATUS_KEY, false);
-            Log.d(Const.MY_LOG, "onStartCommand, startId = " + startId + " status isOnline = " + isOnline + " flag = " + flags);
-            ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, currentID, isOnline);
-            task.run();
+        String action = intent.getAction();
+        if (action != null){
+            if (action.equals(Const.UPDATE_ONLINE_STATUS)){
+                Log.d(Const.MY_LOG, "onStartCommand : UPDATE_ONLINE_STATUS");
+                ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
+                task.run();
+            }
+            if (action.equals(Const.UPLOAD_TASK)){
+                Log.d(Const.MY_LOG, "onStartCommand : uploadTask");
+                UploadImageTask task = new UploadImageTask(startId, intent);
+                task.run();
+            }
         }
         return START_STICKY;
     }
@@ -56,38 +68,103 @@ public class MyService extends Service {
         private FirebaseDatabase database;
         private DatabaseReference ref;
         private User currentUser;
-        private String currentID;
+        private Intent intent;
         private int startId;
+        private String currentID;
         private boolean isOnline;
 
-        private ChangeOnlineStatusUser(int startId, String currentID, boolean isOnline){
-            this.startId = startId;
-            this.currentID = currentID;
-            this.isOnline = isOnline;
-        }
+        private ValueListener updateChildrenListener = new ValueListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                currentUser = dataSnapshot.getValue(User.class);
+                currentUser.setOnline(isOnline);
+                database.getReference(Const.CHAT_USER_INFO).updateChildren(currentUser.toMap());
+                stop();
+            }
+        };
 
-        private void innitDB(){
-            database = FirebaseDatabase.getInstance();
-            ref = database.getReference(Const.CHAT_USER_INFO).child(currentID);
+        private ChangeOnlineStatusUser(int startId, Intent intent){
+            this.startId = startId;
+            this.intent = intent;
         }
 
         @Override
         public void run() {
-            innitDB();
-            ref.addListenerForSingleValueEvent(new ValueListener() {
-                @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
-                    currentUser = dataSnapshot.getValue(User.class);
-                    currentUser.setOnline(isOnline);
-                    database.getReference(Const.CHAT_USER_INFO).updateChildren(currentUser.toMap());
-                    stop();
-                }
-            });
+            innitData();
+            ref.addListenerForSingleValueEvent(updateChildrenListener);
+        }
+
+        private void innitData(){
+            currentID = intent.getStringExtra(Const.CURRENT_ID_KEY);
+            isOnline = intent.getBooleanExtra(Const.ONLINE_STATUS_KEY, false);
+            database = FirebaseDatabase.getInstance();
+            ref = database.getReference(Const.CHAT_USER_INFO).child(currentID);
         }
 
         private void stop(){
             stopSelf(startId);
             Log.d(Const.MY_LOG, "stop run with task = " + startId + " isOnline = " + isOnline);
+        }
+    }
+
+    private class UploadImageTask implements Runnable{
+        private int startId;
+        private byte[] userImage;
+        private Uri photoUri;
+        private PendingIntent pi;
+        private Intent intent;
+
+        private UploadImageTask(int startId, Intent intent) {
+            this.startId = startId;
+            this.intent = intent;
+        }
+
+        private OnSuccessListener addPhotoSuccessListener = new OnSuccessListener<UploadTask.TaskSnapshot>() {
+            @Override
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                String photoUrl = taskSnapshot.getDownloadUrl().toString();
+                stop(Const.UPLOAD_STATUS_OK, photoUrl, null);
+            }
+        };
+
+        private OnFailureListener failureListener = new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                stop(Const.UPLOAD_STATUS_FAIL,null, e.getMessage());
+            }
+        };
+
+        @Override
+        public void run() {
+            innitDataFromIntent();
+            if (photoUri != null){
+                FirebaseStorage fs = FirebaseStorage.getInstance();
+                StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
+                UploadTask uTask = sr.putBytes(userImage);
+                uTask.addOnSuccessListener(addPhotoSuccessListener);
+                uTask.addOnFailureListener(failureListener);
+            }else {
+                stop(Const.UPLOAD_STATUS_OK, null, null);
+            }
+        }
+
+        private void innitDataFromIntent() {
+            photoUri = intent.getData();
+            userImage = intent.getByteArrayExtra(Const.BYTE_IMAGE_KEY);
+            pi = intent.getParcelableExtra(Const.PARAM_PINTENT);
+        }
+
+        private void stop(int uploadStatus, String imageUrl, String exceptionMessage){
+            try {
+                Intent intent = new Intent(MyService.this, MainActivity.class);
+                intent.putExtra(Const.UPLOAD_IMAGE_URL, imageUrl);
+                intent.putExtra(Const.UPLOAD_MESSAGE_KEY, exceptionMessage);
+                pi.send(MyService.this, uploadStatus, intent);
+            }catch (PendingIntent.CanceledException e){
+                e.printStackTrace();
+            }finally {
+                stopSelf(startId);
+            }
         }
     }
 }
