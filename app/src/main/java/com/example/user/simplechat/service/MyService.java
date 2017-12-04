@@ -35,20 +35,19 @@ public class MyService extends Service {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(Const.MY_LOG, "onStartCommand : flags = " + flags + " startId = " + startId);
         String action = intent.getAction();
-        if (action != null){
-            if (action.equals(Const.UPDATE_ONLINE_STATUS)){
-                Log.d(Const.MY_LOG, "onStartCommand : UPDATE_ONLINE_STATUS");
-                ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
-                task.run();
-            }
-            if (action.equals(Const.UPLOAD_IMAGE_TASK)){
-                Log.d(Const.MY_LOG, "onStartCommand : uploadTask");
-                UploadImageTask task = new UploadImageTask(startId, intent);
-                task.run();
-            }
+        if (action.equals(Const.UPDATE_ONLINE_STATUS)){
+            Log.d(Const.MY_LOG, "onStartCommand : UPDATE_ONLINE_STATUS");
+            ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
+            task.run();
         }
-        return START_STICKY;
+        if (action.equals(Const.UPLOAD_IMAGE_TASK)){
+            Log.d(Const.MY_LOG, "onStartCommand : uploadTask");
+            UploadImageTask task = new UploadImageTask(startId, intent);
+            task.run();
+        }
+        return START_REDELIVER_INTENT;
     }
 
     @Override
