@@ -23,12 +23,7 @@
             </intent-filter>
         </activity>
         <service
-            android:name=".service.MyService"
-            android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".service.MySystemService"
-            android:stopWithTask="true"
+            android:name=".service.MyTaskService"
             android:enabled="true"
             android:exported="false" />
     </application>

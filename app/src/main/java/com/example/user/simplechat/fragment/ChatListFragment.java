@@ -133,13 +133,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        //innitDataForQuery();
-    }
-
-    private void checkUserImage() {
-        if (!isTaskIsRunning && myArrayImage == null){
-            getUserImageUri();
-        }
+        innitDataForQuery();
     }
 
     private void innitDataForQuery() {
@@ -151,32 +145,40 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
         chatTableRef = database.getReference(Const.CHAT_ID_TABLE).child(currentUserID);
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
+        bindFragment(this, view);
+        layoutManager = new LinearLayoutManager(getActivity());
+        checkUserImage();
+        if (savedInstanceState == null){
+            innitAdapter();
+        }
+        return view;
+    }
+
+    private void checkUserImage() {
+        if (!isTaskIsRunning && myArrayImage == null){
+            getUserImageUri();
+        }
+    }
+
     public void getUserImageUri(){
         database.getReference(Const.USER_INFO).child(currentUserID)
                 .addListenerForSingleValueEvent(imageUrlListener);
     }
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.chat_list_fragment, container, false);
-        /*bindFragment(this, view);
-        layoutManager = new LinearLayoutManager(getActivity());
-        checkUserImage();
-        if (savedInstanceState == null){
-            innitAdapter();
-        }*/
-        return view;
-    }
+
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        /*outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
+        outState.putParcelableArrayList(Const.USER_LIST_DATA_KEY, usersListData);
         outState.putStringArrayList(Const.CHAT_ID_TABLE_DATA_KEY, enabledChatUsersData);
         outState.putParcelable(Const.LAYOUT_MANAGER_KEY, layoutManager.onSaveInstanceState());
         outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isTaskIsRunning);
-        outState.putByteArray(Const.MY_PHOTO_B_KEY, myArrayImage);*/
+        outState.putByteArray(Const.MY_PHOTO_B_KEY, myArrayImage);
     }
 
     @Override
@@ -240,19 +242,19 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     @Override
     public void onStart() {
         super.onStart();
-        /*if (query != null && chatTableRef != null){
+        if (query != null && chatTableRef != null){
             query.addChildEventListener(usersInfoListener);
             chatTableRef.addChildEventListener(chatIDTableListener);
-        }*/
+        }
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        /*if (query != null && chatTableRef != null){
+        if (query != null && chatTableRef != null){
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
-        }*/
+        }
     }
 
     @Override

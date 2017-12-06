@@ -40,7 +40,6 @@ public class LoginFragment extends BaseFragment {
             isDialogRunning(false);
             if (task.isSuccessful()){
                 showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
-                getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
                 return;
             }
             Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -103,6 +102,9 @@ public class LoginFragment extends BaseFragment {
     }
 
     private void showChatList(FirebaseUser user) {
-        if (user != null)super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+        if (user != null){
+            super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+            getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
+        }
     }
 }

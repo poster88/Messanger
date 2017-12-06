@@ -9,12 +9,11 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.service.MyService;
+import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
 
@@ -72,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startMyService(boolean isOnline, String currentID){
-        Intent intent = new Intent(MainActivity.this, MyService.class);
+        Intent intent = new Intent(MainActivity.this, MyTaskService.class);
         intent.setAction(Const.UPDATE_ONLINE_STATUS);
         intent.putExtra(Const.CURRENT_ID_KEY, currentID);
         intent.putExtra(Const.ONLINE_STATUS_KEY, isOnline);
@@ -94,7 +93,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         setIsOnlineStatus(Const.USER_OFFLINE);
-        Log.d(Const.MY_LOG, "ON PAUSE");
     }
 
     private void setIsOnlineStatus(String action) {

@@ -20,7 +20,7 @@ import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
 
-public class MyService extends Service {
+public class MyTaskService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
@@ -150,17 +150,14 @@ public class MyService extends Service {
         }
 
         private void stop(String uploadStatus, String imageUrl, String exceptionMessage){
-            try {
-                Intent intent = new Intent(Const.UPLOAD_IMAGE_ACTION);
-                intent.putExtra(Const.UPLOAD_STATUS_KEY, uploadStatus);
-                intent.putExtra(Const.UPLOAD_IMAGE_URL, imageUrl);
-                intent.putExtra(Const.UPLOAD_MESSAGE_KEY, exceptionMessage);
-                sendBroadcast(intent);
-            } finally {
-                stopSelf(startId);
-                Log.d(Const.MY_LOG, "stop run UploadImageTask / uploadStatus = " + uploadStatus +
-                        " imageUrl = " + imageUrl + " exceptionMessage = " + exceptionMessage);
-            }
+            Intent intent = new Intent(Const.UPLOAD_IMAGE_ACTION);
+            intent.putExtra(Const.UPLOAD_STATUS_KEY, uploadStatus);
+            intent.putExtra(Const.UPLOAD_IMAGE_URL, imageUrl);
+            intent.putExtra(Const.UPLOAD_MESSAGE_KEY, exceptionMessage);
+            sendBroadcast(intent);
+            stopSelf(startId);
+            Log.d(Const.MY_LOG, "stop run UploadImageTask / uploadStatus = " + uploadStatus +
+                    " imageUrl = " + imageUrl + " exceptionMessage = " + exceptionMessage);
         }
     }
 }
