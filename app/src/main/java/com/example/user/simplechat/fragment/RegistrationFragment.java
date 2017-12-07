@@ -199,7 +199,7 @@ public class RegistrationFragment extends BaseFragment {
 
     private void showChatList() {
         getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
-        isDialogRunning(false);
+        isDialogRunning = false;
         super.removeFragmentFromBackStack();
         super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }

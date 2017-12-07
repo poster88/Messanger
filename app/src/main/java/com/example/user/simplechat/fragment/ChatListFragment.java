@@ -89,9 +89,11 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     private ValueListener imageUrlListener = new ValueListener() {
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            String link = dataSnapshot.getValue(User.class).getImageUrl();
-            if (link != null){
-                setDataForAsyncTask(link);
+            if (dataSnapshot.exists()){
+                String link = dataSnapshot.getValue(User.class).getImageUrl();
+                if (link != null){
+                    setDataForAsyncTask(link);
+                }
             }
         }
     };
@@ -190,6 +192,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
             isTaskIsRunning = savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY);
             if (isTaskIsRunning){
                 myArrayImage = savedInstanceState.getByteArray(Const.MY_PHOTO_B_KEY);
+
             }
             layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
             innitAdapter();
