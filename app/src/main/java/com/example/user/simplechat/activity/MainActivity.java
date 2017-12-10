@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
@@ -14,9 +16,11 @@ import android.util.Log;
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.service.MyService;
+import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
+
+import java.lang.ref.WeakReference;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -30,6 +34,24 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
+
+    public Handler handler;
+
+    public static class StaticHandler extends Handler {
+        private final WeakReference<MainActivity> weakReference;
+
+        public StaticHandler(MainActivity weakReference) {
+            this.weakReference = new WeakReference<MainActivity>(weakReference);
+        }
+
+        @Override
+        public void handleMessage(Message msg) {
+            MainActivity activity = weakReference.get();
+            if (activity != null){
+                Log.d(Const.MY_LOG, "handleMessage: " + msg);
+            }
+        }
+    }
 
     private void checkIntentAction(Intent intent) {
         boolean isOnline = false;
@@ -51,6 +73,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        handler = new StaticHandler(this);
         innitBrReceiver();
         innitSavedInstanceState(savedInstanceState);
     }
@@ -72,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startMyService(boolean isOnline, String currentID){
-        Intent intent = new Intent(MainActivity.this, MyService.class);
+        Intent intent = new Intent(MainActivity.this, MyTaskService.class);
         intent.setAction(Const.UPDATE_ONLINE_STATUS);
         intent.putExtra(Const.CURRENT_ID_KEY, currentID);
         intent.putExtra(Const.ONLINE_STATUS_KEY, isOnline);
@@ -94,7 +117,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
         setIsOnlineStatus(Const.USER_OFFLINE);
-        Log.d(Const.MY_LOG, "ON PAUSE");
     }
 
     private void setIsOnlineStatus(String action) {

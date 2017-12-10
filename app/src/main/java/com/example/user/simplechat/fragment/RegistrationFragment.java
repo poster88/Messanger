@@ -21,7 +21,7 @@ import android.widget.Toast;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.model.User;
-import com.example.user.simplechat.service.MyService;
+import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -51,8 +51,8 @@ public class RegistrationFragment extends BaseFragment {
         public void onReceive(Context context, Intent intent) {
             String result = intent.getStringExtra(Const.UPLOAD_STATUS_KEY);
             if (result.equals(Const.UPLOAD_STATUS_OK)){
-                showChatList(intent.getStringExtra(Const.UPLOAD_IMAGE_URL));
-                getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
+                saveUserDataInDB(new User(), intent.getStringExtra(Const.UPLOAD_IMAGE_URL));
+                showChatList();
             }
             if (result.equals(Const.UPLOAD_STATUS_FAIL)){
                 showErrorMessage(intent.getStringExtra(Const.UPLOAD_MESSAGE_KEY));
@@ -77,10 +77,10 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     private void sendServiceIntent(){
-        Intent serviceIntent = new Intent(getContext(), MyService.class);
+        Intent serviceIntent = new Intent(getContext(), MyTaskService.class);
         serviceIntent.setAction(Const.UPLOAD_IMAGE_TASK);
         serviceIntent.setData(photoUri);
-        serviceIntent.putExtra(Const.BYTE_IMAGE_KEY, RegistrationFragment.super.setByteArrayFromImage(userImage));
+        serviceIntent.putExtra(Const.BYTE_IMAGE_KEY, super.setByteArrayFromImage(userImage));
         getActivity().startService(serviceIntent);
     }
 
@@ -197,9 +197,9 @@ public class RegistrationFragment extends BaseFragment {
         FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
     }
 
-    private void showChatList(String photoUrl) {
-        saveUserDataInDB(new User(), photoUrl);
-        isDialogRunning(false);
+    private void showChatList() {
+        getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
+        isDialogRunning = false;
         super.removeFragmentFromBackStack();
         super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }

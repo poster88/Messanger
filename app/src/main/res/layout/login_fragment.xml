@@ -2,27 +2,42 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center">
+    android:gravity="center"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <EditText
         android:id="@+id/userLoginEdit"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:hint="user login"/>
+        android:lines="1"
+        android:inputType="textEmailAddress"
+        android:hint="user email"/>
 
-    <EditText
-        android:id="@+id/userPasswordEdit"
+    <android.support.design.widget.TextInputLayout
+        android:id="@+id/inputTextPass"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
-        android:layout_below="@id/userLoginEdit"
-        android:hint="user password"/>
+        android:layout_marginTop="6dp"
+        app:passwordToggleEnabled = "true"
+        app:hintEnabled="false"
+        android:layout_gravity="center_horizontal"
+        android:layout_below="@+id/userLoginEdit">
+
+        <EditText
+            android:id="@+id/userPasswordEdit"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="password"
+            android:lines="1"
+            android:inputType="textPassword"/>
+    </android.support.design.widget.TextInputLayout>
 
     <LinearLayout
         android:id="@+id/btnContainer"
         android:layout_width="250dp"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
-        android:layout_below="@id/userPasswordEdit"
+        android:layout_below="@id/inputTextPass"
         android:weightSum="1.0">
 
         <Button

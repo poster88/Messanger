@@ -49,11 +49,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     public void onBindViewHolder(final UserViewHolder holder, int position) {
         setUserImage(holder, usersListData.get(position));
         holder.userName.setText(usersListData.get(position).getUserName());
-        String chatStatus = "no chat";
-        if (enabledChatUsersData.contains(usersListData.get(position).getUserID())){
-            chatStatus = "continue chat";
-        }
-        holder.chatStatus.setText(chatStatus);
+        holder.chatStatus.setText(setChatEnabledStatus(position));
         holder.onlineStatus.setImageResource(setImageStatus(usersListData.get(position).getIsOnline()));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -76,6 +72,10 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
 
     private int setImageStatus(boolean isOnline) {
         return isOnline ? R.drawable.ic_is_online_24dp : R.drawable.ic_is_offline_24dp;
+    }
+
+    private String setChatEnabledStatus(int position){
+        return enabledChatUsersData.contains(usersListData.get(position).getUserID()) ? "continue chat" : "no chat";
     }
 
     @Override

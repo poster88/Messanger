@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="6dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:orientation="vertical"
+        android:layout_height="wrap_content">
+
+        <de.hdodenhof.circleimageview.CircleImageView
+            android:id="@+id/regUserImage"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:src="@drawable/user_anonymous"/>
+
+        <Button
+            android:id="@+id/setImageBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Set image"/>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:layout_gravity="center">
+
+        <EditText
+            android:id="@+id/regUserNameEdit"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:hint="set a user name"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="16dp"/>
+
+        <EditText
+            android:id="@+id/regUserEmailEdit"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:hint="set e-mail"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="6dp"/>
+
+        <android.support.design.widget.TextInputLayout
+            android:id="@+id/inputTextPass"
+            android:layout_width="250dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            app:passwordToggleEnabled = "true"
+            app:hintEnabled="false"
+            android:layout_gravity="center_horizontal">
+
+            <EditText
+                android:id="@+id/regPassEdit"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="password"
+                android:lines="1"
+                android:inputType="textPassword" />
+        </android.support.design.widget.TextInputLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="12dp">
+
+            <Button
+                android:id="@+id/regOkBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="OK"/>
+
+            <Button
+                android:id="@+id/regCancelBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancel"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>
