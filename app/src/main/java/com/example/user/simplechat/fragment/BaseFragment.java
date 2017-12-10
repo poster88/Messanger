@@ -2,6 +2,7 @@ package com.example.user.simplechat.fragment;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -66,11 +67,11 @@ public class BaseFragment extends Fragment {
     }
 
     public void dialogStarted(
-            Activity activity, String title, String message, boolean isIndeterminate, boolean isCancelable,
+            Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
             DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
             DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel
     ) {
-        progressDialog = new ProgressDialog(activity);
+        progressDialog = new ProgressDialog(context);
         progressDialog.setTitle(title);
         progressDialog.setMessage(message);
         progressDialog.setIndeterminate(isIndeterminate);
