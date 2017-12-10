@@ -47,7 +47,7 @@ public class MyTaskService extends Service {
             UploadImageTask task = new UploadImageTask(startId, intent);
             task.run();
         }
-        return START_REDELIVER_INTENT;
+        return START_STICKY;
     }
 
     @Override
