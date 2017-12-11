@@ -3,6 +3,7 @@ package com.example.user.simplechat.fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
@@ -19,6 +20,8 @@ import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseUser;
 
+import java.util.concurrent.TimeUnit;
+
 import butterknife.BindView;
 import butterknife.OnClick;
 
@@ -31,6 +34,8 @@ public class LoginFragment extends BaseFragment {
     @BindView(R.id.userPasswordEdit) EditText userPasswordET;
 
     private boolean isDialogRunning;
+    Handler handler;
+    Thread t;
 
     public static LoginFragment newInstance(){
         return new LoginFragment();
@@ -43,7 +48,6 @@ public class LoginFragment extends BaseFragment {
             isDialogRunning(false);
             if (task.isSuccessful()){
                 Log.d(Const.MY_LOG, "task.isSuccessful: ");
-
                 //showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
                 return;
             }
@@ -57,6 +61,7 @@ public class LoginFragment extends BaseFragment {
         if (savedInstanceState == null){
             showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
         }
+        Log.d(Const.MY_LOG, "onCreate loginFragment ");
     }
 
     private void showChatList(FirebaseUser user) {
@@ -74,31 +79,47 @@ public class LoginFragment extends BaseFragment {
         return view;
     }
 
-    Handler handler;
-
     @OnClick(R.id.loginBtn)
     public void loginAction(){
         if (fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
             Log.d(Const.MY_LOG, "loginAction in the method");
-            Runnable runnable = new Runnable() {
-                @Override
-                public void run() {
-                    Log.d(Const.MY_LOG, "run in the method");
-                    isDialogRunning(true);
-                    ((MainActivity)getActivity()).getAuth()
-                            .signInWithEmailAndPassword(userLoginET.getText().toString(), userPasswordET.getText().toString())
-                            .addOnCompleteListener(loginTaskListener);
-                }
-            };
-            handler = new MainActivity.StaticHandler((MainActivity)getActivity());
-            handler.post(runnable);
+            handler = new Handler(((MainActivity)getActivity()).getHc());
+            t = new Thread(myRun);
+            t.start();
             Log.d(Const.MY_LOG, "handler.post(runnable);");
         }
     }
 
+    Runnable myRun = new Runnable() {
+        @Override
+        public void run() {
+            try {
+                for (int i = 0; i < 7; i++) {
+                    TimeUnit.MILLISECONDS.sleep(2000);
+                    handler.sendEmptyMessage(i);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    };
+
+    Runnable runnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(Const.MY_LOG, "run in the method");
+            isDialogRunning(true);
+            ((MainActivity)getActivity()).getAuth()
+                    .signInWithEmailAndPassword(userLoginET.getText().toString(), userPasswordET.getText().toString())
+                    .addOnCompleteListener(loginTaskListener);
+        }
+    };
+
     @OnClick(R.id.registrationBtn)
     public void regAction(){
-        super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
+        //super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
+        t.interrupt();
+
     }
 
     @Override
@@ -123,6 +144,12 @@ public class LoginFragment extends BaseFragment {
         }
         super.dialogStarted(getContext(),  "Login", "Please wait a moment!",
                 true, false, null, null, null, null);
+    }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+
     }
 
     @Override

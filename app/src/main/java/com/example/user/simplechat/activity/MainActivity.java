@@ -1,8 +1,11 @@
 package com.example.user.simplechat.activity;
 
 
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
@@ -12,6 +15,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.widget.Toast;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
@@ -19,8 +23,6 @@ import com.example.user.simplechat.R;
 import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
-
-import java.lang.ref.WeakReference;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -36,22 +38,21 @@ public class MainActivity extends AppCompatActivity {
     };
 
     public Handler handler;
-
-    public static class StaticHandler extends Handler {
-        private final WeakReference<MainActivity> weakReference;
-
-        public StaticHandler(MainActivity weakReference) {
-            this.weakReference = new WeakReference<MainActivity>(weakReference);
-        }
-
+    private Handler.Callback hc = new Handler.Callback() {
         @Override
-        public void handleMessage(Message msg) {
-            MainActivity activity = weakReference.get();
-            if (activity != null){
-                Log.d(Const.MY_LOG, "handleMessage: " + msg);
+        public boolean handleMessage(Message message) {
+            Log.d(Const.MY_LOG, "handleMessage : " + message.what);
+            if (message.what == 0){
+                dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                        true, false, null, null, null, null);
             }
+            if (message.what == 6){
+                dialogFinished();
+            }
+            Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
+            return false;
         }
-    }
+    };
 
     private void checkIntentAction(Intent intent) {
         boolean isOnline = false;
@@ -73,7 +74,6 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        handler = new StaticHandler(this);
         innitBrReceiver();
         innitSavedInstanceState(savedInstanceState);
     }
@@ -149,5 +149,32 @@ public class MainActivity extends AppCompatActivity {
 
     public FirebaseAuth getAuth() {
         return auth;
+    }
+
+    public Handler.Callback getHc() {
+        return hc;
+    }
+
+    protected ProgressDialog progressDialog;
+
+    public void dialogStarted(
+            Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
+            DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
+            DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel
+    ) {
+        progressDialog = new ProgressDialog(context);
+        progressDialog.setTitle(title);
+        progressDialog.setMessage(message);
+        progressDialog.setIndeterminate(isIndeterminate);
+        progressDialog.setCancelable(isCancelable);
+        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeBtnLabel, negativeBtn);
+        progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveBtnLabel, positiveBtn);
+        progressDialog.show();
+    }
+
+    public void dialogFinished() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
     }
 }
