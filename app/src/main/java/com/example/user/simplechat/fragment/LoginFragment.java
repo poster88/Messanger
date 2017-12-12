@@ -1,6 +1,9 @@
 package com.example.user.simplechat.fragment;
 
+import android.app.DialogFragment;
+import android.content.Context;
 import android.content.Intent;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -62,6 +65,7 @@ public class LoginFragment extends BaseFragment {
             showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
         }
         Log.d(Const.MY_LOG, "onCreate loginFragment ");
+        //taksFragment
     }
 
     private void showChatList(FirebaseUser user) {
@@ -158,5 +162,42 @@ public class LoginFragment extends BaseFragment {
         if (isDialogRunning){
             super.dialogFinished();
         }
+    }
+
+    // This code up to onDetach() is all to get easy callbacks to the Activity.
+    private Callbacks call = dummyCallbacks;
+
+    public interface Callbacks{
+        public void onTaskFinished();
+    }
+
+    private static Callbacks dummyCallbacks = new Callbacks() {
+        @Override
+        public void onTaskFinished() {
+
+        }
+    };
+
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (!(context instanceof Callbacks)){
+            throw new IllegalStateException("Activity must implement fragment's callbacks.");
+        }
+        call = (Callbacks) context;
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        call = dummyCallbacks;
+    }
+
+    static final int TASK_FRAGMENT = 0;
+    static final String TASK_FRAGMENT_TAG = "task";
+
+    public static class TaskFragment extends DialogFragment {
+        // The task we are running.
+
     }
 }

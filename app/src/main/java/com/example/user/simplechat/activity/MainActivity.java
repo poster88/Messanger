@@ -1,13 +1,13 @@
 package com.example.user.simplechat.activity;
 
 
-import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -49,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
             if (message.what == 6){
                 dialogFinished();
             }
-            Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
+            //Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
             return false;
         }
     };
@@ -155,7 +155,7 @@ public class MainActivity extends AppCompatActivity {
         return hc;
     }
 
-    protected ProgressDialog progressDialog;
+    protected ;
 
     public void dialogStarted(
             Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
@@ -175,6 +175,28 @@ public class MainActivity extends AppCompatActivity {
     public void dialogFinished() {
         if (progressDialog != null && progressDialog.isShowing()) {
             progressDialog.dismiss();
+        }
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+
+    }
+
+    private static class DialogTask extends AsyncTask<Void, Void, Void> {
+        MainActivity mainActivity = null;
+        ProgressDialog progressDialog = null;
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            return null;
         }
     }
 }
