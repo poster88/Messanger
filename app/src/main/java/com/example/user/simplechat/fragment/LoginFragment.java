@@ -153,7 +153,6 @@ public class LoginFragment extends BaseFragment {
     @Override
     public void onDestroy() {
         super.onDestroy();
-
     }
 
     @Override
@@ -162,42 +161,5 @@ public class LoginFragment extends BaseFragment {
         if (isDialogRunning){
             super.dialogFinished();
         }
-    }
-
-    // This code up to onDetach() is all to get easy callbacks to the Activity.
-    private Callbacks call = dummyCallbacks;
-
-    public interface Callbacks{
-        public void onTaskFinished();
-    }
-
-    private static Callbacks dummyCallbacks = new Callbacks() {
-        @Override
-        public void onTaskFinished() {
-
-        }
-    };
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (!(context instanceof Callbacks)){
-            throw new IllegalStateException("Activity must implement fragment's callbacks.");
-        }
-        call = (Callbacks) context;
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        call = dummyCallbacks;
-    }
-
-    static final int TASK_FRAGMENT = 0;
-    static final String TASK_FRAGMENT_TAG = "task";
-
-    public static class TaskFragment extends DialogFragment {
-        // The task we are running.
-
     }
 }

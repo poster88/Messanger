@@ -7,7 +7,6 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -15,17 +14,17 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.Toast;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.fragment.TaskFragment;
 import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
 
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements TaskFragment.TaskCallbacks{
     private FragmentManager fm = getSupportFragmentManager();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private BroadcastReceiver br = new BroadcastReceiver() {
@@ -37,18 +36,24 @@ public class MainActivity extends AppCompatActivity {
         }
     };
 
+    //
+    private static final String TAG_TASK_FRAGMENT = "task_fragment";
+    private TaskFragment mTaskFragment;
+    private TaskFragment.TaskCallbacks taskCallbacks;
+    private ProgressDialog progressDialog;
+
     public Handler handler;
     private Handler.Callback hc = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
             Log.d(Const.MY_LOG, "handleMessage : " + message.what);
-            if (message.what == 0){
+            /*if (message.what == 0){
                 dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
                         true, false, null, null, null, null);
             }
             if (message.what == 6){
                 dialogFinished();
-            }
+            }*/
             //Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -75,7 +80,19 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         innitBrReceiver();
-        innitSavedInstanceState(savedInstanceState);
+
+        //innitSavedInstanceState(savedInstanceState);
+        if (savedInstanceState == null){
+            mTaskFragment = (TaskFragment) fm.findFragmentByTag(TAG_TASK_FRAGMENT);
+            if (mTaskFragment == null){
+                Log.d(Const.MY_LOG, "in onCreate: new TaskFragment(), beginTransaction ");
+                mTaskFragment = new TaskFragment();
+                FragmentTransaction ft = fm.beginTransaction();
+                ft.add(R.id.container, mTaskFragment, TAG_TASK_FRAGMENT);
+                ft.commit();
+                //fm.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commit();
+            }
+        }
     }
 
     private void innitSavedInstanceState(Bundle savedInstanceState){
@@ -141,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(br);
+        dialogFinished();
     }
 
     public FragmentManager getFm() {
@@ -155,7 +173,36 @@ public class MainActivity extends AppCompatActivity {
         return hc;
     }
 
-    protected ;
+    //
+    @Override
+    public void onPreExecute() {
+        Log.d(Const.MY_LOG, "MainActivity interface: onPreExecute");
+        dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                true, false, null, null, null, null);
+
+    }
+
+    @Override
+    public void onProgressUpdate(int percent) {
+        Log.d(Const.MY_LOG, "MainActivity interface: onProgressUpdate");
+        if (progressDialog == null){
+            dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                    true, false, null, null, null, null);
+        }
+    }
+
+    @Override
+    public void onCancelled() {
+        Log.d(Const.MY_LOG, "MainActivity interface: onCancelled");
+
+    }
+
+
+    @Override
+    public void onPostExecute() {
+        Log.d(Const.MY_LOG, "MainActivity interface: onPostExecute");
+        dialogFinished();
+    }
 
     public void dialogStarted(
             Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
@@ -178,25 +225,5 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
 
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-
-    }
-
-    private static class DialogTask extends AsyncTask<Void, Void, Void> {
-        MainActivity mainActivity = null;
-        ProgressDialog progressDialog = null;
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            return null;
-        }
-    }
 }
