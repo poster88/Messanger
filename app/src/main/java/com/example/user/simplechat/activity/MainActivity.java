@@ -35,7 +35,10 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
                 replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
                 return false;
             }
-            if (message.what == Const.SIGN_IN_FAIL){
+            if (message.what == Const.REG_OK){
+
+            }
+            if (message.what == Const.TASK_FAIL){
                 MainActivity.super.showToast(MainActivity.this, message.obj.toString());
                 return false;
             }
@@ -146,7 +149,7 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
     @Override
     public void onPostExecute(int result, String message) {
         super.dialogFinished();
-        if (result == Const.SIGN_IN_FAIL){
+        if (result == Const.TASK_FAIL){
             Message msg = handler.obtainMessage(result, message);
             handler.sendMessage(msg);
             return;

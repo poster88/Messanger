@@ -66,8 +66,11 @@ public final class Const {
     //key for Bundle
     public static final String EMAIL_KEY = "EMAIL_KEY";
     public static final String PASSWORD_KEY = "PASSWORD_KEY";
+    public static final String NAME_KEY = "NAME_KEY";
 
-    //key for tasks
+    //key for Handler
+    public static final int TASK_FAIL = 0;
     public static final int SIGN_IN_OK = 1;
-    public static final int SIGN_IN_FAIL = 0;
+    public static final int REG_OK = 2;
+
 }

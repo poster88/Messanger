@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.EditText;
@@ -13,7 +12,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.user.simplechat.R;
 import com.example.user.simplechat.activity.BaseActivity;
 
 import java.io.ByteArrayOutputStream;

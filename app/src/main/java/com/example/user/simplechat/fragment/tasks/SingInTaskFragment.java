@@ -4,8 +4,8 @@ import android.content.Context;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
-import android.util.Log;
-import com.example.user.simplechat.activity.MainActivity;
+
+import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.fragment.BaseFragment;
 import com.example.user.simplechat.fragment.impl.AsyncTaskCallbacks;
 import com.example.user.simplechat.utils.Const;
@@ -23,10 +23,10 @@ public class SingInTaskFragment extends BaseFragment {
     }
 
     public static SingInTaskFragment newInstance(String email, String password){
-        SingInTaskFragment fragment = new SingInTaskFragment();
         Bundle args = new Bundle();
         args.putString(Const.EMAIL_KEY, email);
         args.putString(Const.PASSWORD_KEY, password);
+        SingInTaskFragment fragment = new SingInTaskFragment();
         fragment.setArguments(args);
         return fragment;
     }
@@ -45,12 +45,6 @@ public class SingInTaskFragment extends BaseFragment {
                 .execute();
     }
 
-    @Override
-    public void onResume() {
-        super.onResume();
-        Log.d(Const.MY_LOG, "SingInTaskFragment: onResume - in background");
-    }
-
     private class LoginTask extends AsyncTask<Void, Void, Boolean> {
         private Task<AuthResult> signInTask;
         private String email;
@@ -64,7 +58,7 @@ public class SingInTaskFragment extends BaseFragment {
         @Override
         protected void onPreExecute() {
             if (callbacks != null) callbacks.onPreExecute();
-            signInTask = ((MainActivity)getActivity()).getAuth()
+            signInTask = ((BaseActivity)getActivity()).getAuth()
                     .signInWithEmailAndPassword(email, password);
         }
 
@@ -85,18 +79,18 @@ public class SingInTaskFragment extends BaseFragment {
         }
 
         @Override
-        protected void onPostExecute(Boolean aBoolean) {
+        protected void onPostExecute(Boolean isSuccessful) {
             if (callbacks != null){
-                if (signInTask.isSuccessful()){
+                if (isSuccessful){
                     callbacks.onPostExecute(Const.SIGN_IN_OK, null);
                 }else {
                     try {
-                        callbacks.onPostExecute(Const.SIGN_IN_FAIL, signInTask.getException().getMessage());
+                        callbacks.onPostExecute(Const.TASK_FAIL, signInTask.getException().getMessage());
                     } catch (NullPointerException e){
                         e.printStackTrace();
                     }
                 }
-                SingInTaskFragment.super.remove(((MainActivity)getActivity()).getFm(), SingInTaskFragment.this);
+                SingInTaskFragment.super.remove(((BaseActivity)getActivity()).getFm(), SingInTaskFragment.this);
             }
         }
 
