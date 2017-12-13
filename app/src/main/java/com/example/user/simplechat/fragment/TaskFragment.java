@@ -2,26 +2,32 @@ package com.example.user.simplechat.fragment;
 
 
 import android.app.DialogFragment;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.utils.Const;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 /**
  * Created by POSTER on 12.12.2017.
  */
 
-public class TaskFragment extends BaseFragment {
+public class TaskFragment extends DialogFragment {
 
     /**
      * Callback interface through which the fragment will report the
@@ -37,6 +43,7 @@ public class TaskFragment extends BaseFragment {
     private TaskCallbacks mCallbacks;
     private DummyTask mTask;
     private ProgressBar mProgressBar;
+    private Context context;
     /**
      * Hold a reference to the parent Activity so we can report the
      * task's current progress and results. The Android framework
@@ -62,6 +69,8 @@ public class TaskFragment extends BaseFragment {
         Log.d(Const.MY_LOG, "TaskFragment: onAttach - new DummyTask(). setRetainInstance(true);");
     }
 
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,13 +78,16 @@ public class TaskFragment extends BaseFragment {
         /*if (mTask != null){
             mTask.execute();
         }*/
-        mTask = new DummyTask();
-        mTask.execute();
+        /*mTask = new DummyTask();
+        mTask.execute();*/
+
+        if (mCallbacks != null){
+            mCallbacks.onPreExecute();
+        }
+
     }
 
-
-
-    @Nullable
+    /*@Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_task, container, false);
@@ -84,7 +96,7 @@ public class TaskFragment extends BaseFragment {
         //getDialog().setTitle("progress dialog");
         //getDialog().setCanceledOnTouchOutside(false);
         return view;
-    }
+    }*/
 
     /*@Override
     public void onDestroyView() {
@@ -145,11 +157,14 @@ public class TaskFragment extends BaseFragment {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            for (int i = 0; !isCancelled() && i < 100; i++) {
+            Log.d(Const.MY_LOG, "run in the method");
+
+
+            /*for (int i = 0; !isCancelled() && i < 100; i++) {
                 Log.d(Const.MY_LOG, "DummyTask (doInBackground): i = " + i);
                 SystemClock.sleep(100);
                 publishProgress(i);
-            }
+            }*/
             return null;
         }
 

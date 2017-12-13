@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -21,9 +23,9 @@ import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.util.concurrent.TimeUnit;
 
 import butterknife.BindView;
 import butterknife.OnClick;
@@ -40,6 +42,8 @@ public class LoginFragment extends BaseFragment {
     Handler handler;
     Thread t;
 
+    private static final String TAG_TASK_FRAGMENT = "task_fragment";
+
     public static LoginFragment newInstance(){
         return new LoginFragment();
     }
@@ -48,10 +52,9 @@ public class LoginFragment extends BaseFragment {
         @Override
         public void onComplete(@NonNull Task task) {
             Log.d(Const.MY_LOG, "loginTaskListener in the method");
-            isDialogRunning(false);
             if (task.isSuccessful()){
                 Log.d(Const.MY_LOG, "task.isSuccessful: ");
-                //showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
+                showChatList(FirebaseAuth.getInstance().getCurrentUser());
                 return;
             }
             Toast.makeText(getContext(), task.getException().getMessage(), Toast.LENGTH_SHORT).show();
@@ -63,9 +66,9 @@ public class LoginFragment extends BaseFragment {
         super.onCreate(savedInstanceState);
         if (savedInstanceState == null){
             showChatList(((MainActivity)getActivity()).getAuth().getCurrentUser());
+            return;
         }
         Log.d(Const.MY_LOG, "onCreate loginFragment ");
-        //taksFragment
     }
 
     private void showChatList(FirebaseUser user) {
@@ -86,57 +89,50 @@ public class LoginFragment extends BaseFragment {
     @OnClick(R.id.loginBtn)
     public void loginAction(){
         if (fieldValidation(userLoginET) && fieldValidation(userPasswordET)){
-            Log.d(Const.MY_LOG, "loginAction in the method");
-            handler = new Handler(((MainActivity)getActivity()).getHc());
-            t = new Thread(myRun);
-            t.start();
-            Log.d(Const.MY_LOG, "handler.post(runnable);");
-        }
-    }
-
-    Runnable myRun = new Runnable() {
-        @Override
-        public void run() {
-            try {
-                for (int i = 0; i < 7; i++) {
-                    TimeUnit.MILLISECONDS.sleep(2000);
-                    handler.sendEmptyMessage(i);
-                }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    };
-
-    Runnable runnable = new Runnable() {
-        @Override
-        public void run() {
-            Log.d(Const.MY_LOG, "run in the method");
-            isDialogRunning(true);
+            Log.d(Const.MY_LOG, "LoginFragment : loginAction");
+            /*isDialogRunning(true);
             ((MainActivity)getActivity()).getAuth()
                     .signInWithEmailAndPassword(userLoginET.getText().toString(), userPasswordET.getText().toString())
                     .addOnCompleteListener(loginTaskListener);
+            handler = new Handler(((MainActivity)getActivity()).getHc());
+            t = new Thread(myRun);
+            t.start();*/
+
+            /*mTaskFragment = (TaskFragment) ((MainActivity)getActivity()).getFm().findFragmentByTag(TAG_TASK_FRAGMENT);
+            if (mTaskFragment == null){
+                Log.d(Const.MY_LOG, "in onCreate: new TaskFragment(), beginTransaction ");
+                mTaskFragment = new TaskFragment();
+                FragmentTransaction ft = ((MainActivity)getActivity()).getFm().beginTransaction();
+                ft.add(R.id.container, mTaskFragment, TAG_TASK_FRAGMENT);
+                ft.commit();
+                //fm.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commit();
+            }*/
+
+            MyDialogFragment myDialogFragment = MyDialogFragment.newInstance();
+            FragmentTransaction ft = ((MainActivity)getActivity()).getFm().beginTransaction();
+            ft.add(R.id.container, myDialogFragment);
+            ft.commit();
+
+            //Log.d(Const.MY_LOG, "handler.post(runnable);");
         }
-    };
+    }
 
     @OnClick(R.id.registrationBtn)
     public void regAction(){
-        //super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
-        t.interrupt();
-
+        super.replaceFragments(RegistrationFragment.newInstance(), Const.REGISTRATION_TAG);
     }
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isDialogRunning);
+        //outState.putBoolean(Const.IS_DIALOG_RUNNING_KEY, isDialogRunning);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            isDialogRunning(savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY, false));
+            //isDialogRunning(savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY, false));
         }
     }
 
@@ -148,11 +144,6 @@ public class LoginFragment extends BaseFragment {
         }
         super.dialogStarted(getContext(),  "Login", "Please wait a moment!",
                 true, false, null, null, null, null);
-    }
-
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
     }
 
     @Override

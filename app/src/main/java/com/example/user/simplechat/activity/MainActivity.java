@@ -18,13 +18,13 @@ import android.util.Log;
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.fragment.TaskFragment;
+import com.example.user.simplechat.fragment.MyDialogFragment;
 import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
 import com.google.firebase.auth.FirebaseAuth;
 
 
-public class MainActivity extends AppCompatActivity implements TaskFragment.TaskCallbacks{
+public class MainActivity extends AppCompatActivity implements MyDialogFragment.DialogCallbacks{
     private FragmentManager fm = getSupportFragmentManager();
     private FirebaseAuth auth = FirebaseAuth.getInstance();
     private BroadcastReceiver br = new BroadcastReceiver() {
@@ -36,10 +36,6 @@ public class MainActivity extends AppCompatActivity implements TaskFragment.Task
         }
     };
 
-    //
-    private static final String TAG_TASK_FRAGMENT = "task_fragment";
-    private TaskFragment mTaskFragment;
-    private TaskFragment.TaskCallbacks taskCallbacks;
     private ProgressDialog progressDialog;
 
     public Handler handler;
@@ -54,6 +50,7 @@ public class MainActivity extends AppCompatActivity implements TaskFragment.Task
             if (message.what == 6){
                 dialogFinished();
             }*/
+
             //Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
             return false;
         }
@@ -81,17 +78,9 @@ public class MainActivity extends AppCompatActivity implements TaskFragment.Task
         setContentView(R.layout.activity_main);
         innitBrReceiver();
 
-        //innitSavedInstanceState(savedInstanceState);
+        innitSavedInstanceState(savedInstanceState);
         if (savedInstanceState == null){
-            mTaskFragment = (TaskFragment) fm.findFragmentByTag(TAG_TASK_FRAGMENT);
-            if (mTaskFragment == null){
-                Log.d(Const.MY_LOG, "in onCreate: new TaskFragment(), beginTransaction ");
-                mTaskFragment = new TaskFragment();
-                FragmentTransaction ft = fm.beginTransaction();
-                ft.add(R.id.container, mTaskFragment, TAG_TASK_FRAGMENT);
-                ft.commit();
-                //fm.beginTransaction().add(mTaskFragment, TAG_TASK_FRAGMENT).commit();
-            }
+
         }
     }
 
@@ -173,37 +162,6 @@ public class MainActivity extends AppCompatActivity implements TaskFragment.Task
         return hc;
     }
 
-    //
-    @Override
-    public void onPreExecute() {
-        Log.d(Const.MY_LOG, "MainActivity interface: onPreExecute");
-        dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
-                true, false, null, null, null, null);
-
-    }
-
-    @Override
-    public void onProgressUpdate(int percent) {
-        Log.d(Const.MY_LOG, "MainActivity interface: onProgressUpdate");
-        if (progressDialog == null){
-            dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
-                    true, false, null, null, null, null);
-        }
-    }
-
-    @Override
-    public void onCancelled() {
-        Log.d(Const.MY_LOG, "MainActivity interface: onCancelled");
-
-    }
-
-
-    @Override
-    public void onPostExecute() {
-        Log.d(Const.MY_LOG, "MainActivity interface: onPostExecute");
-        dialogFinished();
-    }
-
     public void dialogStarted(
             Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
             DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
@@ -225,5 +183,27 @@ public class MainActivity extends AppCompatActivity implements TaskFragment.Task
         }
     }
 
+    @Override
+    public void onPreExecute() {
+        dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                true, false, null, null, null, null);
+    }
 
+    @Override
+    public void onProgressUpdate() {
+        if (progressDialog == null){
+            dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                    true, false, null, null, null, null);
+        }
+    }
+
+    @Override
+    public void onCancelled() {
+        dialogFinished();
+    }
+
+    @Override
+    public void onPostExecute() {
+        dialogFinished();
+    }
 }
