@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
+import com.example.user.simplechat.fragment.impl.TaskListener;
 import com.example.user.simplechat.listener.ChildValueListener;
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.ChatTable;
@@ -37,7 +39,7 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment implements UserRecycleAdapter.MyClickListener, TaskListener{
+public class ChatListFragment extends BaseFragment implements UserRecycleAdapter.MyClickListener, TaskListener {
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
 
     private boolean isTaskIsRunning = false;
@@ -222,7 +224,7 @@ public class ChatListFragment extends BaseFragment implements UserRecycleAdapter
     }
 
     private void setDataForFragment(String userID, byte[] recPhotoArray, DataSnapshot dataSnapshot){
-        ChatListFragment.super.replaceFragments(
+        ((BaseActivity) getActivity()).replaceFragments(
                 ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), myArrayImage, recPhotoArray),
                 Const.CHAT_FRAG_TAG);
     }

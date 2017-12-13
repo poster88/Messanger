@@ -1,32 +1,24 @@
 package com.example.user.simplechat.activity;
 
 
-import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
-import com.example.user.simplechat.fragment.MyDialogFragment;
+import com.example.user.simplechat.fragment.impl.AsyncTaskCallbacks;
 import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
-import com.google.firebase.auth.FirebaseAuth;
 
 
-public class MainActivity extends AppCompatActivity implements MyDialogFragment.DialogCallbacks{
-    private FragmentManager fm = getSupportFragmentManager();
-    private FirebaseAuth auth = FirebaseAuth.getInstance();
+public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
+    private Handler handler;
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -35,31 +27,25 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             }
         }
     };
-
-    private ProgressDialog progressDialog;
-
-    public Handler handler;
     private Handler.Callback hc = new Handler.Callback() {
         @Override
         public boolean handleMessage(Message message) {
-            Log.d(Const.MY_LOG, "handleMessage : " + message.what);
-            /*if (message.what == 0){
-                dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
-                        true, false, null, null, null, null);
+            if (message.what == Const.SIGN_IN_OK){
+                sendBroadcast(new Intent(Const.USER_ONLINE));
+                replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+                return false;
             }
-            if (message.what == 6){
-                dialogFinished();
-            }*/
-
-            //Toast.makeText(getApplicationContext(), "handleMessage : " + message.what, Toast.LENGTH_SHORT).show();
+            if (message.what == Const.SIGN_IN_FAIL){
+                MainActivity.super.showToast(MainActivity.this, message.obj.toString());
+                return false;
+            }
             return false;
         }
     };
 
     private void checkIntentAction(Intent intent) {
         boolean isOnline = false;
-        String currentID = auth.getUid();
-
+        String currentID = super.getAuth().getUid();
         if (intent.getAction().equals(Const.USER_ONLINE)){
             isOnline = true;
         }
@@ -67,7 +53,7 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
             isOnline = false;
         }
         if (intent.getAction().equals(Const.USER_LOG_OFF)){
-            auth.signOut();
+            super.getAuth().signOut();
         }
         startMyService(isOnline, currentID);
     }
@@ -76,19 +62,14 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        handler = new Handler(hc);
         innitBrReceiver();
-
-        innitSavedInstanceState(savedInstanceState);
-        if (savedInstanceState == null){
-
-        }
+        showLoginFragment(savedInstanceState);
     }
 
-    private void innitSavedInstanceState(Bundle savedInstanceState){
+    private void showLoginFragment(Bundle savedInstanceState){
         if (savedInstanceState == null){
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.add(R.id.container, LoginFragment.newInstance());
-            ft.commit();
+            addFragment(LoginFragment.newInstance());
         }
     }
 
@@ -115,29 +96,24 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-    }
-
-    @Override
     protected void onPause() {
         super.onPause();
         setIsOnlineStatus(Const.USER_OFFLINE);
     }
 
     private void setIsOnlineStatus(String action) {
-        if (auth.getCurrentUser() != null){
+        if (super.getAuth().getCurrentUser() != null){
             sendBroadcast(new Intent(action));
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (fm.getBackStackEntryCount() > 0){
-            if ((fm.findFragmentById(R.id.container)) instanceof ChatListFragment){
+        if (super.getFm().getBackStackEntryCount() > 0){
+            if ((super.getFm().findFragmentById(R.id.container)) instanceof ChatListFragment){
                 setIsOnlineStatus(Const.USER_LOG_OFF);
             }
-            fm.popBackStack();
+            super.getFm().popBackStack();
             return;
         }
         super.onBackPressed();
@@ -150,60 +126,40 @@ public class MainActivity extends AppCompatActivity implements MyDialogFragment.
         dialogFinished();
     }
 
-    public FragmentManager getFm() {
-        return fm;
-    }
-
-    public FirebaseAuth getAuth() {
-        return auth;
-    }
-
-    public Handler.Callback getHc() {
-        return hc;
-    }
-
-    public void dialogStarted(
-            Context context, String title, String message, boolean isIndeterminate, boolean isCancelable,
-            DialogInterface.OnClickListener negativeBtn, String negativeBtnLabel,
-            DialogInterface.OnClickListener positiveBtn, String positiveBtnLabel
-    ) {
-        progressDialog = new ProgressDialog(context);
-        progressDialog.setTitle(title);
-        progressDialog.setMessage(message);
-        progressDialog.setIndeterminate(isIndeterminate);
-        progressDialog.setCancelable(isCancelable);
-        progressDialog.setButton(DialogInterface.BUTTON_NEGATIVE, negativeBtnLabel, negativeBtn);
-        progressDialog.setButton(DialogInterface.BUTTON_POSITIVE, positiveBtnLabel, positiveBtn);
-        progressDialog.show();
-    }
-
-    public void dialogFinished() {
-        if (progressDialog != null && progressDialog.isShowing()) {
-            progressDialog.dismiss();
-        }
-    }
-
-    @Override
-    public void onPreExecute() {
-        dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+    private void setLoginPrDialog(){
+        super.dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
                 true, false, null, null, null, null);
     }
 
     @Override
+    public void onPreExecute() {
+        setLoginPrDialog();
+    }
+
+    @Override
     public void onProgressUpdate() {
-        if (progressDialog == null){
-            dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
-                    true, false, null, null, null, null);
+        if (super.getProgressDialog() == null){
+            setLoginPrDialog();
         }
     }
 
     @Override
-    public void onCancelled() {
-        dialogFinished();
+    public void onPostExecute(int result, String message) {
+        super.dialogFinished();
+        if (result == Const.SIGN_IN_FAIL){
+            Message msg = handler.obtainMessage(result, message);
+            handler.sendMessage(msg);
+            return;
+        }
+        handler.sendEmptyMessage(result);
     }
 
     @Override
-    public void onPostExecute() {
-        dialogFinished();
+    public void onCancelled() {
+        super.dialogFinished();
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 }

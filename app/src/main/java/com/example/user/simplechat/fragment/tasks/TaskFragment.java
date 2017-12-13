@@ -1,4 +1,4 @@
-package com.example.user.simplechat.fragment;
+package com.example.user.simplechat.fragment.tasks;
 
 
 import android.app.DialogFragment;

@@ -19,6 +19,7 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.activity.MainActivity;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.service.MyTaskService;
@@ -85,7 +86,6 @@ public class RegistrationFragment extends BaseFragment {
     }
 
     private void showErrorMessage(String message) {
-        isDialogRunning(false);
         Toast.makeText(getContext(), message, Toast.LENGTH_SHORT).show();
     }
 
@@ -109,7 +109,6 @@ public class RegistrationFragment extends BaseFragment {
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         if (savedInstanceState != null){
-            isDialogRunning(savedInstanceState.getBoolean(Const.IS_DIALOG_RUNNING_KEY));
             checkPhotoUri((Uri) savedInstanceState.getParcelable(Const.USER_IMAGE_KEY));
         }
     }
@@ -169,22 +168,11 @@ public class RegistrationFragment extends BaseFragment {
     @OnClick(R.id.regOkBtn)
     public void okBtnClick(){
         if (fieldValidation(userName) && fieldValidation(userEmail) && fieldValidation(userPass)){
-            isDialogRunning(true);
             ((MainActivity) getActivity()).getAuth()
                     .createUserWithEmailAndPassword(userEmail.getText().toString(), userPass.getText().toString())
                     .addOnSuccessListener(regSuccessListener)
                     .addOnFailureListener(failureListener);
         }
-    }
-
-    private void isDialogRunning(boolean flag){
-        isDialogRunning = flag;
-        if (!flag){
-            super.dialogFinished();
-            return;
-        }
-        super.dialogStarted(getActivity(), "Registration", "Please wait a moment!",
-                true, false, null, null, null, null);
     }
 
     private void saveUserDataInDB(User user, String photoUrl){
@@ -201,7 +189,7 @@ public class RegistrationFragment extends BaseFragment {
         getActivity().sendBroadcast(new Intent(Const.USER_ONLINE));
         isDialogRunning = false;
         super.removeFragmentFromBackStack();
-        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+        ((BaseActivity) getActivity()).replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }
 
     @Override

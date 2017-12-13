@@ -48,18 +48,26 @@ public final class Const {
     public static final String UPLOAD_STATUS_OK = "UPLOAD_STATUS_OK";
     public static final String UPLOAD_STATUS_FAIL = "UPLOAD_STATUS_FAIL";
 
-    //keys for broadcastReceiver actions
+    //keys for BroadcastReceiver actions
     public static final String USER_ONLINE = "USER_ONLINE";
     public static final String USER_OFFLINE = "USER_OFFLINE";
     public static final String USER_LOG_OFF = "USER_LOG_OFF";
 
-    //keys for service
+    //keys for Service
     public static final String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
     public static final String UPLOAD_IMAGE_TASK = "UPLOAD_IMAGE_TASK";
     public static final String CURRENT_ID_KEY = "CURRENT_ID_KEY";
     public static final String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
     public static final String BYTE_IMAGE_KEY = "BYTE_IMAGE_KEY";
 
-    //key for log
+    //key for Log
     public static final String MY_LOG = "MY_LOG";
+
+    //key for Bundle
+    public static final String EMAIL_KEY = "EMAIL_KEY";
+    public static final String PASSWORD_KEY = "PASSWORD_KEY";
+
+    //key for tasks
+    public static final int SIGN_IN_OK = 1;
+    public static final int SIGN_IN_FAIL = 0;
 }
