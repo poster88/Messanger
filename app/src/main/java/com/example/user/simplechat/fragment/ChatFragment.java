@@ -12,11 +12,11 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.adapter.ChatRecycleAdapter;
 import com.example.user.simplechat.listener.ChildValueListener;
 import com.example.user.simplechat.model.Message;
 import com.example.user.simplechat.utils.Const;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
@@ -39,7 +39,6 @@ public class ChatFragment extends BaseFragment{
     @BindView(R.id.chatContainer) RecyclerView chatRecyclerView;
     @BindView(R.id.messageArea) EditText messageEditText;
 
-    private String currentID;
     private String chatID;
     private FirebaseDatabase database;
     private Query messageQuery;
@@ -51,13 +50,12 @@ public class ChatFragment extends BaseFragment{
     private Bitmap receiverPhoto;
 
 
-    public static ChatFragment newInstance(String receiverID, String chatID, byte[] myPhotoArray, byte[] recPhotoArray){
+    public static ChatFragment newInstance(String receiverID, String chatID, byte[] recPhotoArray){
         ChatFragment cf = new ChatFragment();
 
         Bundle args = new Bundle();
         args.putString(Const.RECEIVER_ID, receiverID);
         args.putString(Const.CHAT_ID, chatID);
-        args.putByteArray(Const.MY_PHOTO_B_KEY, myPhotoArray);
         args.putByteArray(Const.REC_PHOTO_B_KEY, recPhotoArray);
         cf.setArguments(args);
         return cf;
@@ -96,7 +94,6 @@ public class ChatFragment extends BaseFragment{
     private void innitDataForQuery() {
         messageArray = new ArrayList<>();
         database = FirebaseDatabase.getInstance();
-        currentID = FirebaseAuth.getInstance().getUid();
         chatID = getArguments().getString(Const.CHAT_ID);
     }
 
@@ -106,12 +103,16 @@ public class ChatFragment extends BaseFragment{
         View view = inflater.inflate(R.layout.chat_fragment, container, false);
         bindFragment(this, view);
         layoutManager = new LinearLayoutManager(getContext());
-        if (savedInstanceState == null) innitAdapter();
+        if (savedInstanceState != null){
+            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
+            messageArray = savedInstanceState.getParcelableArrayList(Const.CHAT_LIST_DATA_KEY);
+        }
+        innitAdapter();
         return view;
     }
 
     private void innitAdapter() {
-        adapter = new ChatRecycleAdapter(messageArray, currentID, myPhoto, receiverPhoto);
+        adapter = new ChatRecycleAdapter(messageArray, ((BaseActivity) getActivity()).getAuth().getUid(), myPhoto, receiverPhoto);
         chatRecyclerView.setLayoutManager(layoutManager);
         chatRecyclerView.setAdapter(adapter);
     }
@@ -119,11 +120,7 @@ public class ChatFragment extends BaseFragment{
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        if (savedInstanceState != null){
-            layoutManager.onRestoreInstanceState(savedInstanceState.getParcelable(Const.LAYOUT_MANAGER_KEY));
-            messageArray = savedInstanceState.getParcelableArrayList(Const.CHAT_LIST_DATA_KEY);
-            innitAdapter();
-        }
+
     }
 
     @Override
@@ -166,7 +163,7 @@ public class ChatFragment extends BaseFragment{
 
     public Message setMessageData() {
         Message message = new Message();
-        message.setAuthorID(currentID);
+        message.setAuthorID(((BaseActivity) getActivity()).getAuth().getUid());
         message.setMessageText(messageEditText.getText().toString());
         message.setMessageTime((new Timestamp(System.currentTimeMillis())).getTime());
         return message;
