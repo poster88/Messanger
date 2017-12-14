@@ -57,7 +57,8 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
             public void onClick(View view) {
                 myClickListener.onItemClick(
                         usersListData.get(holder.getAdapterPosition()).getUserID(),
-                        setByteArrayFromImage(holder.userImage));
+                        setByteArrayFromImage(holder.userImage)
+                );
             }
         });
     }
