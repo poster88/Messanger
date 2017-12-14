@@ -1,6 +1,7 @@
 package com.example.user.simplechat.fragment.tasks;
 
 import android.content.Context;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
@@ -14,9 +15,10 @@ import com.example.user.simplechat.utils.Const;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
-import java.util.HashMap;
-import java.util.Map;
 
 /**
  * Created by POSTER on 14.12.2017.
@@ -28,11 +30,13 @@ public class RegTaskFragment extends BaseFragment {
     public RegTaskFragment() {
     }
 
-    public static RegTaskFragment newInstance(String email, String password, String name) {
+    public static RegTaskFragment newInstance(String email, String password, String name, byte[] image, Uri imageURI) {
         Bundle args = new Bundle();
         args.putString(Const.EMAIL_KEY, email);
         args.putString(Const.PASSWORD_KEY, password);
         args.putString(Const.NAME_KEY, name);
+        args.putString(Const.URI_PHOTO_KEY, imageURI.toString());
+        args.putByteArray(Const.IMAGE_ARRAY_KEY, image);
 
         RegTaskFragment fragment = new RegTaskFragment();
         fragment.setArguments(args);
@@ -52,20 +56,27 @@ public class RegTaskFragment extends BaseFragment {
         new RegTask(
                 getArguments().getString(Const.EMAIL_KEY),
                 getArguments().getString(Const.PASSWORD_KEY),
-                getArguments().getString(Const.NAME_KEY)
+                getArguments().getString(Const.NAME_KEY),
+                getArguments().getByteArray(Const.IMAGE_ARRAY_KEY),
+                Uri.parse(getArguments().getString(Const.URI_PHOTO_KEY))
         ).execute();
     }
 
     private class RegTask extends AsyncTask<Void, Void, Boolean> {
         private Task<AuthResult> regTask;
+        private UploadTask uploadTask;
+        private byte[] userImage;
+        private Uri photoUri;
         private String email;
         private String password;
         private String name;
 
-        public RegTask(String email, String password, String name) {
+        public RegTask(String email, String password, String name, byte[] userImage, Uri photoUri) {
             this.email = email;
             this.password = password;
             this.name = name;
+            this.userImage = userImage;
+            this.photoUri = photoUri;
         }
 
         @Override
@@ -80,14 +91,17 @@ public class RegTaskFragment extends BaseFragment {
         @Override
         protected Boolean doInBackground(Void... voids) {
             while (!regTask.isComplete()){
-                publishProgress();
-                SystemClock.sleep(100);
+                setProgress();
             }
             if (regTask.isSuccessful()){
-                saveUserDataInDB(new User());
-                //TODO : Service - uploadImage; updateUserData;
+                saveUserDataInDB(new User(), getImageURL());
             }
             return regTask.isSuccessful();
+        }
+
+        private void setProgress() {
+            publishProgress();
+            SystemClock.sleep(100);
         }
 
         @Override
@@ -104,8 +118,15 @@ public class RegTaskFragment extends BaseFragment {
                     callbacks.onPostExecute(Const.REG_OK, null);
                 }else {
                     try {
-                        callbacks.onPostExecute(Const.TASK_FAIL, regTask.getException().getMessage());
-                    } catch (NullPointerException e){
+                        sendFailMsg(regTask.getException().getMessage());
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
+                }
+                if (uploadTask != null && !uploadTask.isSuccessful()){
+                    try {
+                        sendFailMsg(uploadTask.getException().getMessage());
+                    }catch (NullPointerException e){
                         e.printStackTrace();
                     }
                 }
@@ -113,15 +134,40 @@ public class RegTaskFragment extends BaseFragment {
             }
         }
 
+        private void sendFailMsg(String msg){
+            callbacks.onPostExecute(Const.TASK_FAIL, msg);
+        }
+
         @Override
         protected void onCancelled() {
             if (callbacks != null) callbacks.onCancelled();
         }
 
-        private void saveUserDataInDB(User user){
+        private String getImageURL() {
+            String imageURL = null;
+            if (photoUri != null){
+                FirebaseStorage fs = FirebaseStorage.getInstance();
+                StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
+                uploadTask = sr.putBytes(userImage);
+                while (uploadTask.isInProgress()){
+                   setProgress();
+                }
+                if (uploadTask.isSuccessful()){
+                    try {
+                        imageURL = uploadTask.getResult().getDownloadUrl().toString();
+                    }catch (NullPointerException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+            return imageURL;
+        }
+
+        private void saveUserDataInDB(User user, String imageURL){
             user.setUserID(((BaseActivity) getActivity()).getAuth().getUid());
             user.setUserName(name);
             user.setUserEmail(email);
+            user.setImageUrl(imageURL);
             FirebaseDatabase.getInstance().getReference(Const.USER_INFO).updateChildren(user.toMap());
         }
     }

@@ -26,6 +26,7 @@ public class SingInTaskFragment extends BaseFragment {
         Bundle args = new Bundle();
         args.putString(Const.EMAIL_KEY, email);
         args.putString(Const.PASSWORD_KEY, password);
+
         SingInTaskFragment fragment = new SingInTaskFragment();
         fragment.setArguments(args);
         return fragment;

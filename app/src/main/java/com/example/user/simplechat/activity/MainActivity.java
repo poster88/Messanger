@@ -31,12 +31,13 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
         @Override
         public boolean handleMessage(Message message) {
             if (message.what == Const.SIGN_IN_OK){
-                sendBroadcast(new Intent(Const.USER_ONLINE));
-                replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+                showChatListFragment();
                 return false;
             }
             if (message.what == Const.REG_OK){
-
+                MainActivity.super.removeFragmentFromBackStack();
+                showChatListFragment();
+                return false;
             }
             if (message.what == Const.TASK_FAIL){
                 MainActivity.super.showToast(MainActivity.this, message.obj.toString());
@@ -45,6 +46,11 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
             return false;
         }
     };
+
+    private void showChatListFragment() {
+        sendBroadcast(new Intent(Const.USER_ONLINE));
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+    }
 
     private void checkIntentAction(Intent intent) {
         boolean isOnline = false;
@@ -72,7 +78,7 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
 
     private void showLoginFragment(Bundle savedInstanceState){
         if (savedInstanceState == null){
-            addFragment(LoginFragment.newInstance());
+            super.addFragment(LoginFragment.newInstance());
         }
     }
 
@@ -99,8 +105,8 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
     }
 
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onStop() {
+        super.onStop();
         setIsOnlineStatus(Const.USER_OFFLINE);
     }
 

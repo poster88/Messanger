@@ -12,7 +12,6 @@ import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
-import com.example.user.simplechat.activity.BaseActivity;
 
 import java.io.ByteArrayOutputStream;
 
@@ -32,15 +31,15 @@ public class BaseFragment extends Fragment {
         unbinder = ButterKnife.bind(target, view);
     }
 
-    public void setImageToView(Uri uri, ImageView view) {
-        Glide.with(this)
+    protected void setImageToView(Uri uri, ImageView view, Fragment fragment) {
+        Glide.with(fragment)
                 .load(uri)
                 .crossFade()
                 .thumbnail(0.5f)
                 .diskCacheStrategy(DiskCacheStrategy.ALL).into(view);
     }
 
-    public byte[] setByteArrayFromImage(CircleImageView userImage){
+    protected byte[] setByteArrayFromImage(CircleImageView userImage){
         userImage.setDrawingCacheEnabled(true);
         userImage.buildDrawingCache();
 
@@ -48,10 +47,6 @@ public class BaseFragment extends Fragment {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
         return baos.toByteArray();
-    }
-
-    protected void removeFragmentFromBackStack(){
-        ((BaseActivity) getActivity()).getFm().popBackStack();
     }
 
     protected void remove(FragmentManager fm, Fragment fragment) {

@@ -59,6 +59,10 @@ public class BaseActivity extends AppCompatActivity{
         ft.commit();
     }
 
+    public void removeFragmentFromBackStack(){
+        fm.popBackStack();
+    }
+
     public FragmentManager getFm() {
         return fm;
     }

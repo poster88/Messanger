@@ -37,7 +37,7 @@ public class LoginFragment extends BaseFragment {
 
     private void isShouldLoadLoginFragment(Bundle savedInstanceState) {
         if (savedInstanceState == null){
-            if (((BaseActivity) getActivity()).getAuth() != null){
+            if (((BaseActivity) getActivity()).getAuth().getCurrentUser() != null){
                 ((MainActivity) getActivity()).getHandler().sendEmptyMessage(Const.SIGN_IN_OK);
             }
         }

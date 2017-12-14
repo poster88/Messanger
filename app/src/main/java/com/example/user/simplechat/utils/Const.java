@@ -23,7 +23,6 @@ public final class Const {
 
     //keys for onSaveInstance
     public static final String IS_DIALOG_RUNNING_KEY = "isTaskRunning";
-    public static final String USER_IMAGE_KEY = "userImageKey";
     public static final String USER_LIST_DATA_KEY = "userListDataKey";
     public static final String CHAT_LIST_DATA_KEY = "chatListDataKey";
     public static final String CHAT_ID_TABLE_DATA_KEY = "enabledChatUsersDataKey";
@@ -40,14 +39,6 @@ public final class Const {
     public static final int VIEW_TYPE_LEFT = 0;
     public static final int VIEW_TYPE_RIGHT = 1;
 
-    //keys for uploadImageTask
-    public static final String UPLOAD_MESSAGE_KEY = "UPLOAD_MESSAGE_KEY";
-    public static final String UPLOAD_STATUS_KEY = "UPLOAD_STATUS_KEY";
-    public static final String UPLOAD_IMAGE_URL = "UPLOAD_IMAGE_URL";
-    public static final String UPLOAD_IMAGE_ACTION = "UPLOAD_IMAGE_ACTION";
-    public static final String UPLOAD_STATUS_OK = "UPLOAD_STATUS_OK";
-    public static final String UPLOAD_STATUS_FAIL = "UPLOAD_STATUS_FAIL";
-
     //keys for BroadcastReceiver actions
     public static final String USER_ONLINE = "USER_ONLINE";
     public static final String USER_OFFLINE = "USER_OFFLINE";
@@ -55,10 +46,8 @@ public final class Const {
 
     //keys for Service
     public static final String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
-    public static final String UPLOAD_IMAGE_TASK = "UPLOAD_IMAGE_TASK";
     public static final String CURRENT_ID_KEY = "CURRENT_ID_KEY";
     public static final String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
-    public static final String BYTE_IMAGE_KEY = "BYTE_IMAGE_KEY";
 
     //key for Log
     public static final String MY_LOG = "MY_LOG";
@@ -67,6 +56,8 @@ public final class Const {
     public static final String EMAIL_KEY = "EMAIL_KEY";
     public static final String PASSWORD_KEY = "PASSWORD_KEY";
     public static final String NAME_KEY = "NAME_KEY";
+    public static final String URI_PHOTO_KEY = "URI_PHOTO_KEY";
+    public static final String IMAGE_ARRAY_KEY = "IMAGE_ARRAY_KEY";
 
     //key for Handler
     public static final int TASK_FAIL = 0;
