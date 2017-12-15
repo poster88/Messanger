@@ -1,6 +1,5 @@
 package com.example.user.simplechat.fragment;
 
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
@@ -14,7 +13,6 @@ import com.example.user.simplechat.R;
 import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.adapter.UserRecycleAdapter;
 import com.example.user.simplechat.fragment.impl.MyClickListener;
-import com.example.user.simplechat.fragment.impl.TaskListener;
 import com.example.user.simplechat.listener.ChildValueListener;
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.ChatTable;
@@ -26,7 +24,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 
 import butterknife.BindView;
@@ -35,7 +32,7 @@ import butterknife.BindView;
  * Created by User on 011 11.10.17.
  */
 
-public class ChatListFragment extends BaseFragment implements MyClickListener, TaskListener {
+public class ChatListFragment extends BaseFragment implements MyClickListener{
     @BindView(R.id.userRecycleView) RecyclerView usersRecView;
 
     private String currentUserID;
@@ -204,16 +201,5 @@ public class ChatListFragment extends BaseFragment implements MyClickListener, T
             query.removeEventListener(usersInfoListener);
             chatTableRef.removeEventListener(chatIDTableListener);
         }
-    }
-
-    @Override
-    public void onTaskStarted() {
-
-    }
-
-    @Override
-    public void onTaskFinished(Bitmap result) {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        result.compress(Bitmap.CompressFormat.JPEG, 100, baos);
     }
 }

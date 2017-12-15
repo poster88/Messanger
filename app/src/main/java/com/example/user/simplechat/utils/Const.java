@@ -22,7 +22,6 @@ public final class Const {
     public static final String CHAT_FRAG_TAG = "ChatFragment";
 
     //keys for onSaveInstance
-    public static final String IS_DIALOG_RUNNING_KEY = "isTaskRunning";
     public static final String USER_LIST_DATA_KEY = "userListDataKey";
     public static final String CHAT_LIST_DATA_KEY = "chatListDataKey";
     public static final String CHAT_ID_TABLE_DATA_KEY = "enabledChatUsersDataKey";
