@@ -2,22 +2,15 @@ package com.example.user.simplechat.service;
 
 import android.app.Service;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.IBinder;
-import android.support.annotation.NonNull;
 import android.util.Log;
 
 import com.example.user.simplechat.listener.ValueListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 
 public class MyTaskService extends Service {
@@ -40,11 +33,6 @@ public class MyTaskService extends Service {
         if (action.equals(Const.UPDATE_ONLINE_STATUS)){
             Log.d(Const.MY_LOG, "onStartCommand : UPDATE_ONLINE_STATUS");
             ChangeOnlineStatusUser task = new ChangeOnlineStatusUser(startId, intent);
-            task.run();
-        }
-        if (action.equals(Const.UPLOAD_IMAGE_TASK)){
-            Log.d(Const.MY_LOG, "onStartCommand : uploadTask");
-            UploadImageTask task = new UploadImageTask(startId, intent);
             task.run();
         }
         return START_STICKY;
@@ -101,63 +89,6 @@ public class MyTaskService extends Service {
         private void stop(){
             stopSelf(startId);
             Log.d(Const.MY_LOG, "stop run with task = " + startId + " isOnline = " + isOnline);
-        }
-    }
-
-    private class UploadImageTask implements Runnable{
-        private int startId;
-        private byte[] userImage;
-        private Uri photoUri;
-        private Intent intent;
-
-        private UploadImageTask(int startId, Intent intent) {
-            this.startId = startId;
-            this.intent = intent;
-        }
-
-        private OnSuccessListener addPhotoSuccessListener = new OnSuccessListener<UploadTask.TaskSnapshot>() {
-            @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                String photoUrl = taskSnapshot.getDownloadUrl().toString();
-                stop(Const.UPLOAD_STATUS_OK, photoUrl, null);
-            }
-        };
-
-        private OnFailureListener failureListener = new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                stop(Const.UPLOAD_STATUS_FAIL,null, e.getMessage());
-            }
-        };
-
-        @Override
-        public void run() {
-            innitDataFromIntent();
-            if (photoUri != null){
-                FirebaseStorage fs = FirebaseStorage.getInstance();
-                StorageReference sr = fs.getReference(Const.USERS_IMAGES).child(photoUri.getLastPathSegment());
-                UploadTask uTask = sr.putBytes(userImage);
-                uTask.addOnSuccessListener(addPhotoSuccessListener);
-                uTask.addOnFailureListener(failureListener);
-            }else {
-                stop(Const.UPLOAD_STATUS_OK, null, null);
-            }
-        }
-
-        private void innitDataFromIntent() {
-            photoUri = intent.getData();
-            userImage = intent.getByteArrayExtra(Const.BYTE_IMAGE_KEY);
-        }
-
-        private void stop(String uploadStatus, String imageUrl, String exceptionMessage){
-            Intent intent = new Intent(Const.UPLOAD_IMAGE_ACTION);
-            intent.putExtra(Const.UPLOAD_STATUS_KEY, uploadStatus);
-            intent.putExtra(Const.UPLOAD_IMAGE_URL, imageUrl);
-            intent.putExtra(Const.UPLOAD_MESSAGE_KEY, exceptionMessage);
-            sendBroadcast(intent);
-            stopSelf(startId);
-            Log.d(Const.MY_LOG, "stop run UploadImageTask / uploadStatus = " + uploadStatus +
-                    " imageUrl = " + imageUrl + " exceptionMessage = " + exceptionMessage);
         }
     }
 }

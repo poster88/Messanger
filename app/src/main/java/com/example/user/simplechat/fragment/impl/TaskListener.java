@@ -1,4 +1,4 @@
-package com.example.user.simplechat.fragment;
+package com.example.user.simplechat.fragment.impl;
 
 import android.graphics.Bitmap;
 

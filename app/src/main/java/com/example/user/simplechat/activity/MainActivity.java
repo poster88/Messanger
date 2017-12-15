@@ -8,24 +8,17 @@ import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.fragment.impl.AsyncTaskCallbacks;
 import com.example.user.simplechat.service.MyTaskService;
 import com.example.user.simplechat.utils.Const;
-import com.google.firebase.auth.FirebaseAuth;
-
-import java.lang.ref.WeakReference;
 
 
-public class MainActivity extends AppCompatActivity {
-    private FragmentManager fm = getSupportFragmentManager();
-    private FirebaseAuth auth = FirebaseAuth.getInstance();
+public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
+    private Handler handler;
     private BroadcastReceiver br = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -34,29 +27,34 @@ public class MainActivity extends AppCompatActivity {
             }
         }
     };
-
-    public Handler handler;
-
-    public static class StaticHandler extends Handler {
-        private final WeakReference<MainActivity> weakReference;
-
-        public StaticHandler(MainActivity weakReference) {
-            this.weakReference = new WeakReference<MainActivity>(weakReference);
-        }
-
+    private Handler.Callback hc = new Handler.Callback() {
         @Override
-        public void handleMessage(Message msg) {
-            MainActivity activity = weakReference.get();
-            if (activity != null){
-                Log.d(Const.MY_LOG, "handleMessage: " + msg);
+        public boolean handleMessage(Message message) {
+            if (message.what == Const.SIGN_IN_OK){
+                showChatListFragment();
+                return false;
             }
+            if (message.what == Const.REG_OK){
+                MainActivity.super.removeFragmentFromBackStack();
+                showChatListFragment();
+                return false;
+            }
+            if (message.what == Const.TASK_FAIL){
+                MainActivity.super.showToast(MainActivity.this, message.obj.toString());
+                return false;
+            }
+            return false;
         }
+    };
+
+    private void showChatListFragment() {
+        sendBroadcast(new Intent(Const.USER_ONLINE));
+        super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
     }
 
     private void checkIntentAction(Intent intent) {
         boolean isOnline = false;
-        String currentID = auth.getUid();
-
+        String currentID = super.getAuth().getUid();
         if (intent.getAction().equals(Const.USER_ONLINE)){
             isOnline = true;
         }
@@ -64,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
             isOnline = false;
         }
         if (intent.getAction().equals(Const.USER_LOG_OFF)){
-            auth.signOut();
+            super.getAuth().signOut();
         }
         startMyService(isOnline, currentID);
     }
@@ -73,16 +71,14 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        handler = new StaticHandler(this);
+        handler = new Handler(hc);
         innitBrReceiver();
-        innitSavedInstanceState(savedInstanceState);
+        showLoginFragment(savedInstanceState);
     }
 
-    private void innitSavedInstanceState(Bundle savedInstanceState){
+    private void showLoginFragment(Bundle savedInstanceState){
         if (savedInstanceState == null){
-            FragmentTransaction ft = fm.beginTransaction();
-            ft.add(R.id.container, LoginFragment.newInstance());
-            ft.commit();
+            super.addFragment(LoginFragment.newInstance());
         }
     }
 
@@ -111,27 +107,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStop() {
         super.onStop();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
         setIsOnlineStatus(Const.USER_OFFLINE);
     }
 
     private void setIsOnlineStatus(String action) {
-        if (auth.getCurrentUser() != null){
+        if (super.getAuth().getCurrentUser() != null){
             sendBroadcast(new Intent(action));
         }
     }
 
     @Override
     public void onBackPressed() {
-        if (fm.getBackStackEntryCount() > 0){
-            if ((fm.findFragmentById(R.id.container)) instanceof ChatListFragment){
+        if (super.getFm().getBackStackEntryCount() > 0){
+            if ((super.getFm().findFragmentById(R.id.container)) instanceof ChatListFragment){
                 setIsOnlineStatus(Const.USER_LOG_OFF);
             }
-            fm.popBackStack();
+            super.getFm().popBackStack();
             return;
         }
         super.onBackPressed();
@@ -141,13 +132,43 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         unregisterReceiver(br);
+        dialogFinished();
     }
 
-    public FragmentManager getFm() {
-        return fm;
+    private void setLoginPrDialog(){
+        super.dialogStarted(MainActivity.this,  "Login", "Please wait a moment!",
+                true, false, null, null, null, null);
     }
 
-    public FirebaseAuth getAuth() {
-        return auth;
+    @Override
+    public void onPreExecute() {
+        setLoginPrDialog();
+    }
+
+    @Override
+    public void onProgressUpdate() {
+        if (super.getProgressDialog() == null){
+            setLoginPrDialog();
+        }
+    }
+
+    @Override
+    public void onPostExecute(int result, String message) {
+        super.dialogFinished();
+        if (result == Const.TASK_FAIL){
+            Message msg = handler.obtainMessage(result, message);
+            handler.sendMessage(msg);
+            return;
+        }
+        handler.sendEmptyMessage(result);
+    }
+
+    @Override
+    public void onCancelled() {
+        super.dialogFinished();
+    }
+
+    public Handler getHandler() {
+        return handler;
     }
 }

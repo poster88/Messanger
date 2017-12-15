@@ -15,6 +15,7 @@ import com.bumptech.glide.load.resource.drawable.GlideDrawable;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.user.simplechat.R;
+import com.example.user.simplechat.fragment.impl.MyClickListener;
 import com.example.user.simplechat.model.User;
 import com.example.user.simplechat.utils.Const;
 
@@ -29,7 +30,7 @@ import de.hdodenhof.circleimageview.CircleImageView;
  * Created by POSTER on 07.11.2017.
  */
 
-public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder>{
+public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.UserViewHolder> {
     private ArrayList<User> usersListData;
     private ArrayList<String> enabledChatUsersData;
     private MyClickListener myClickListener;
@@ -50,13 +51,14 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         setUserImage(holder, usersListData.get(position));
         holder.userName.setText(usersListData.get(position).getUserName());
         holder.chatStatus.setText(setChatEnabledStatus(position));
-        holder.onlineStatus.setImageResource(setImageStatus(usersListData.get(position).getIsOnline()));
+        holder.onlineStatus.setImageResource(setOnlineStatusToImage(usersListData.get(position).getIsOnline()));
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 myClickListener.onItemClick(
                         usersListData.get(holder.getAdapterPosition()).getUserID(),
-                        setByteArrayFromImage(holder.userImage));
+                        setByteArrayFromImage(holder.userImage)
+                );
             }
         });
     }
@@ -70,7 +72,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         return baos.toByteArray();
     }
 
-    private int setImageStatus(boolean isOnline) {
+    private int setOnlineStatusToImage(boolean isOnline) {
         return isOnline ? R.drawable.ic_is_online_24dp : R.drawable.ic_is_offline_24dp;
     }
 
@@ -124,11 +126,8 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
         this.myClickListener = myClickListener;
     }
 
-    public interface MyClickListener {
-        void onItemClick(String userID, byte[] recPhotoArray);
-    }
 
-    public static class UserViewHolder extends RecyclerView.ViewHolder{
+    public static class UserViewHolder extends RecyclerView.ViewHolder {
         @BindView(R.id.itemUserImage) CircleImageView userImage;
         @BindView(R.id.itemUserName) TextView userName;
         @BindView(R.id.progressBarItemList) ProgressBar progressBar;
