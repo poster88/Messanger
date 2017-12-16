@@ -1,11 +1,14 @@
 package com.example.user.simplechat.fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -81,8 +84,10 @@ public class ChatFragment extends BaseFragment{
     }
 
     private void innitPhotoArrays() {
-        byte[] myPhotoArray = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
-        if (myPhotoArray != null){
+        SharedPreferences sPref = getContext().getSharedPreferences(Const.USER_DATA, Context.MODE_PRIVATE);
+        String image = sPref.getString(Const.USER_IMAGE_KEY, null);
+        if (image != null){
+            byte[] myPhotoArray = Base64.decode(image, Base64.DEFAULT);
             myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
         }
         byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);

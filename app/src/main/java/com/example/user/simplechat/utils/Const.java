@@ -28,7 +28,6 @@ public final class Const {
     public static final String LAYOUT_MANAGER_KEY = "layoutManagerKey";
     public static final String DEFAULT_IMAGE_KEY = "default";
     public static final String QUERY_NAME_KEY = "userName";
-    public static final String MY_PHOTO_B_KEY = "myPhotoKeyArray";
     public static final String REC_PHOTO_B_KEY = "receiverPhotoArray";
 
     //keys for onActivityResult
@@ -62,5 +61,9 @@ public final class Const {
     public static final int TASK_FAIL = 0;
     public static final int SIGN_IN_OK = 1;
     public static final int REG_OK = 2;
+
+    //key for sharedPreferences
+    public static final String USER_DATA = "USER_DATA";
+    public static final String USER_IMAGE_KEY = "USER_IMAGE_KEY";
 
 }
