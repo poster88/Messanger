@@ -1,11 +1,13 @@
 package com.example.user.simplechat.fragment.tasks;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
+import android.util.Base64;
 
 import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.fragment.BaseFragment;
@@ -95,8 +97,19 @@ public class RegTaskFragment extends BaseFragment {
             }
             if (regTask.isSuccessful()){
                 saveUserDataInDB(new User(), getImageURL());
+                saveImageToSharedPref(userImage);
             }
             return regTask.isSuccessful();
+        }
+
+        private void saveImageToSharedPref(byte[] imageArray) {
+            if (imageArray != null){
+                SharedPreferences sPref = getContext().getSharedPreferences(Const.USER_DATA, Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = sPref.edit();
+                String imageEncoded = Base64.encodeToString(imageArray, Base64.DEFAULT);
+                editor.putString(Const.USER_IMAGE_KEY, imageEncoded);
+                editor.apply();
+            }
         }
 
         private void setProgress() {
@@ -135,7 +148,7 @@ public class RegTaskFragment extends BaseFragment {
         }
 
         private void sendFailMsg(String msg){
-            callbacks.onPostExecute(Const.TASK_FAIL, msg);
+            if (callbacks != null) callbacks.onPostExecute(Const.TASK_FAIL, msg);
         }
 
         @Override

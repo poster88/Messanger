@@ -32,16 +32,13 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
         public boolean handleMessage(Message message) {
             if (message.what == Const.SIGN_IN_OK){
                 showChatListFragment();
-                return false;
             }
             if (message.what == Const.REG_OK){
                 MainActivity.super.removeFragmentFromBackStack();
                 showChatListFragment();
-                return false;
             }
             if (message.what == Const.TASK_FAIL){
                 MainActivity.super.showToast(MainActivity.this, message.obj.toString());
-                return false;
             }
             return false;
         }
