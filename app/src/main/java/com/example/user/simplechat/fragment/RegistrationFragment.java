@@ -115,9 +115,13 @@ public class RegistrationFragment extends BaseFragment {
                     userPass.getText().toString(),
                     userName.getText().toString(),
                     super.setByteArrayFromImage(userImage),
-                    photoUri
+                    checkURI()
             );
             ((BaseActivity)getActivity()).addFragment(regTaskFragment);
         }
+    }
+
+    private String checkURI(){
+         return photoUri != null ? photoUri.toString() : null;
     }
 }

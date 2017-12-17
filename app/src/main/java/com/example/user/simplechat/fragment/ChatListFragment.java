@@ -1,10 +1,14 @@
 package com.example.user.simplechat.fragment;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.DividerItemDecoration;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -164,10 +168,18 @@ public class ChatListFragment extends BaseFragment implements MyClickListener{
     }
 
     private void setDataForChatFragment(String userID, byte[] recPhotoArray, DataSnapshot dataSnapshot){
-        ((BaseActivity) getActivity()).replaceFragments(
-                ChatFragment.newInstance(userID, checkDataSnapshot(dataSnapshot, chatTableRef, userID), recPhotoArray),
-                Const.CHAT_FRAG_TAG
-        );
+        SharedPreferences sPref = getContext().getSharedPreferences(Const.USER_DATA, Context.MODE_PRIVATE);
+        String strImage = sPref.getString(Const.USER_IMAGE_KEY, null);
+
+        ((BaseActivity) getActivity()).replaceFragments(ChatFragment.newInstance(
+                userID,
+                checkDataSnapshot(dataSnapshot, chatTableRef, userID),
+                stringToByte(strImage),
+                recPhotoArray), Const.CHAT_FRAG_TAG);
+    }
+
+    public byte[] stringToByte(String encodedString){
+        return (encodedString != null) ? Base64.decode(encodedString,Base64.DEFAULT) : null;
     }
 
     private String checkDataSnapshot(DataSnapshot dataSnapshot, DatabaseReference ref, String receiverID) {
