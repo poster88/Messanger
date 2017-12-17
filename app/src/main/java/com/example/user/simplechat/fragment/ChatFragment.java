@@ -1,14 +1,11 @@
 package com.example.user.simplechat.fragment;
 
-import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Base64;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -51,15 +48,17 @@ public class ChatFragment extends BaseFragment{
     private DatabaseReference chatArchiveRef;
     private Bitmap myPhoto;
     private Bitmap receiverPhoto;
+    private String receiverID;
 
 
-    public static ChatFragment newInstance(String receiverID, String chatID, byte[] recPhotoArray){
+    public static ChatFragment newInstance(String receiverID, String chatID, byte[] myPhotoArray, byte[] recPhotoArray){
         ChatFragment cf = new ChatFragment();
 
         Bundle args = new Bundle();
         args.putString(Const.RECEIVER_ID, receiverID);
         args.putString(Const.CHAT_ID, chatID);
         args.putByteArray(Const.REC_PHOTO_B_KEY, recPhotoArray);
+        args.putByteArray(Const.MY_PHOTO_B_KEY, myPhotoArray);
         cf.setArguments(args);
         return cf;
     }
@@ -84,12 +83,11 @@ public class ChatFragment extends BaseFragment{
     }
 
     private void innitPhotoArrays() {
-        SharedPreferences sPref = getContext().getSharedPreferences(Const.USER_DATA, Context.MODE_PRIVATE);
-        String image = sPref.getString(Const.USER_IMAGE_KEY, null);
-        if (image != null){
-            byte[] myPhotoArray = Base64.decode(image, Base64.DEFAULT);
-            myPhoto = BitmapFactory.decodeByteArray(myPhotoArray, 0, myPhotoArray.length);
+        byte[] myPhotoImage = getArguments().getByteArray(Const.MY_PHOTO_B_KEY);
+        if (myPhotoImage != null){
+            myPhoto = BitmapFactory.decodeByteArray(myPhotoImage, 0, myPhotoImage.length);
         }
+
         byte[] receiverPhotoArray = getArguments().getByteArray(Const.REC_PHOTO_B_KEY);
         if (receiverPhotoArray != null){
             receiverPhoto = BitmapFactory.decodeByteArray(receiverPhotoArray, 0, receiverPhotoArray.length);
@@ -100,6 +98,7 @@ public class ChatFragment extends BaseFragment{
         messageArray = new ArrayList<>();
         database = FirebaseDatabase.getInstance();
         chatID = getArguments().getString(Const.CHAT_ID);
+        receiverID = getArguments().getString(Const.RECEIVER_ID);
     }
 
     @Nullable
@@ -120,12 +119,6 @@ public class ChatFragment extends BaseFragment{
         adapter = new ChatRecycleAdapter(messageArray, ((BaseActivity) getActivity()).getAuth().getUid(), myPhoto, receiverPhoto);
         chatRecyclerView.setLayoutManager(layoutManager);
         chatRecyclerView.setAdapter(adapter);
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-
     }
 
     @Override

@@ -17,7 +17,6 @@ import com.bumptech.glide.request.target.Target;
 import com.example.user.simplechat.R;
 import com.example.user.simplechat.fragment.impl.MyClickListener;
 import com.example.user.simplechat.model.User;
-import com.example.user.simplechat.utils.Const;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -86,7 +85,7 @@ public class UserRecycleAdapter extends RecyclerView.Adapter<UserRecycleAdapter.
     }
 
     private void setUserImage(UserViewHolder holder, User model) {
-        if (model.getImageUrl() == null || model.getImageUrl().equals(Const.DEFAULT_IMAGE_KEY)){
+        if (model.getImageUrl() == null){
             setImageDefault(holder.userImage, holder.progressBar);
             return;
         }

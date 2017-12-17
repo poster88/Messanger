@@ -29,6 +29,7 @@ public final class Const {
     public static final String DEFAULT_IMAGE_KEY = "default";
     public static final String QUERY_NAME_KEY = "userName";
     public static final String REC_PHOTO_B_KEY = "receiverPhotoArray";
+    public static final String MY_PHOTO_B_KEY = "myPhotoArray";
 
     //keys for onActivityResult
     public static final int REQUEST_READ_PERMISSION = 9003;
@@ -46,6 +47,7 @@ public final class Const {
     public static final String UPDATE_ONLINE_STATUS = "UPDATE_ONLINE_STATUS";
     public static final String CURRENT_ID_KEY = "CURRENT_ID_KEY";
     public static final String ONLINE_STATUS_KEY = "ONLINE_STATUS_KEY";
+    public static final String UPDATE_PROFILE = "UPDATE_PROFILE";
 
     //key for Log
     public static final String MY_LOG = "MY_LOG";

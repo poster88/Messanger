@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+import com.example.user.simplechat.fragment.ChatFragment;
 import com.example.user.simplechat.fragment.ChatListFragment;
 import com.example.user.simplechat.fragment.LoginFragment;
 import com.example.user.simplechat.R;
@@ -45,8 +46,16 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
     };
 
     private void showChatListFragment() {
+        updateUserProfile(super.getAuth().getUid());
         sendBroadcast(new Intent(Const.USER_ONLINE));
         super.replaceFragments(ChatListFragment.newInstance(), Const.CHAT_LIST_TAG);
+    }
+
+    private void updateUserProfile(String currentID) {
+        Intent intent = new Intent(MainActivity.this, MyTaskService.class);
+        intent.setAction(Const.UPDATE_PROFILE);
+        intent.putExtra(Const.CURRENT_ID_KEY, currentID);
+        startService(intent);
     }
 
     private void checkIntentAction(Intent intent) {
@@ -118,6 +127,9 @@ public class MainActivity extends BaseActivity implements AsyncTaskCallbacks {
         if (super.getFm().getBackStackEntryCount() > 0){
             if ((super.getFm().findFragmentById(R.id.container)) instanceof ChatListFragment){
                 setIsOnlineStatus(Const.USER_LOG_OFF);
+            }
+            if ((super.getFm().findFragmentById(R.id.container)) instanceof ChatFragment){
+                //TODO: delete chat link if message array is null
             }
             super.getFm().popBackStack();
             return;

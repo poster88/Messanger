@@ -1,13 +1,11 @@
 package com.example.user.simplechat.fragment.tasks;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.SystemClock;
 import android.support.annotation.Nullable;
-import android.util.Base64;
 
 import com.example.user.simplechat.activity.BaseActivity;
 import com.example.user.simplechat.fragment.BaseFragment;
@@ -32,12 +30,12 @@ public class RegTaskFragment extends BaseFragment {
     public RegTaskFragment() {
     }
 
-    public static RegTaskFragment newInstance(String email, String password, String name, byte[] image, Uri imageURI) {
+    public static RegTaskFragment newInstance(String email, String password, String name, byte[] image, String imageURI) {
         Bundle args = new Bundle();
         args.putString(Const.EMAIL_KEY, email);
         args.putString(Const.PASSWORD_KEY, password);
         args.putString(Const.NAME_KEY, name);
-        args.putString(Const.URI_PHOTO_KEY, imageURI.toString());
+        args.putString(Const.URI_PHOTO_KEY, imageURI);
         args.putByteArray(Const.IMAGE_ARRAY_KEY, image);
 
         RegTaskFragment fragment = new RegTaskFragment();
@@ -60,8 +58,12 @@ public class RegTaskFragment extends BaseFragment {
                 getArguments().getString(Const.PASSWORD_KEY),
                 getArguments().getString(Const.NAME_KEY),
                 getArguments().getByteArray(Const.IMAGE_ARRAY_KEY),
-                Uri.parse(getArguments().getString(Const.URI_PHOTO_KEY))
+                setURI(getArguments().getString(Const.URI_PHOTO_KEY))
         ).execute();
+    }
+
+    private Uri setURI(String uri) {
+        return uri != null ? Uri.parse(uri) : null;
     }
 
     private class RegTask extends AsyncTask<Void, Void, Boolean> {
@@ -97,19 +99,8 @@ public class RegTaskFragment extends BaseFragment {
             }
             if (regTask.isSuccessful()){
                 saveUserDataInDB(new User(), getImageURL());
-                saveImageToSharedPref(userImage);
             }
             return regTask.isSuccessful();
-        }
-
-        private void saveImageToSharedPref(byte[] imageArray) {
-            if (imageArray != null){
-                SharedPreferences sPref = getContext().getSharedPreferences(Const.USER_DATA, Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = sPref.edit();
-                String imageEncoded = Base64.encodeToString(imageArray, Base64.DEFAULT);
-                editor.putString(Const.USER_IMAGE_KEY, imageEncoded);
-                editor.apply();
-            }
         }
 
         private void setProgress() {
