@@ -144,6 +144,9 @@ public class MyTaskService extends Service {
         };
 
         private String bitMapToString(Bitmap bitmap){
+            if (bitmap == null){
+                return null;
+            }
             ByteArrayOutputStream baos = new  ByteArrayOutputStream();
             bitmap.compress(Bitmap.CompressFormat.PNG,100, baos);
             byte [] b = baos.toByteArray();
